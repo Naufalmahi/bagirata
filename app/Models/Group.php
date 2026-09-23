@@ -15,6 +15,8 @@ class Group extends Model
         'user_id',
         'name',
         'description',
+        'avatar_path',
+        'category',
     ];
 
     public function owner()
@@ -50,6 +52,11 @@ class Group extends Model
     public function channels()
     {
         return $this->hasMany(Channel::class)->orderBy('sort_order');
+    }
+
+    public function wallet()
+    {
+        return $this->hasOne(GroupWallet::class);
     }
 
     public function sessions()

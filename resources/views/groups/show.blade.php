@@ -26,6 +26,7 @@
                 @if ($can['manage_roles'])
                     <a href="{{ route('groups.manage', $group) }}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Kelola</a>
                 @endif
+                <a href="{{ route('groups.treasury.show', $group) }}" class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Kas Grup</a>
                 @if ($can['create_patungan'])
                     <a href="{{ route('nongkrong.create', ['group' => $group->id]) }}" class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">+ Patungan</a>
                 @endif

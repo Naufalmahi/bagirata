@@ -61,6 +61,20 @@ Route::middleware('auth')->group(function () {
     Route::delete('/groups/{group}/roles/{role}', [GroupController::class, 'destroyRole'])->name('groups.roles.destroy');
     Route::post('/groups/{group}/members/{member}/role', [GroupController::class, 'assignRole'])->name('groups.members.role');
 
+    // ==== Treasury ====
+    Route::get('/groups/{group}/treasury', [\App\Http\Controllers\Web\TreasuryController::class, 'show'])->name('groups.treasury.show');
+    Route::post('/groups/{group}/treasury', [\App\Http\Controllers\Web\TreasuryController::class, 'store'])->name('groups.treasury.store');
+    Route::post('/groups/{group}/treasury/{entry}/approve', [\App\Http\Controllers\Web\TreasuryController::class, 'approve'])->name('groups.treasury.approve');
+    Route::post('/groups/{group}/treasury/{entry}/reject', [\App\Http\Controllers\Web\TreasuryController::class, 'reject'])->name('groups.treasury.reject');
+
+    // ==== Quick Calculator ====
+    Route::get('/calculator', [\App\Http\Controllers\Web\QuickCalculatorController::class, 'index'])->name('calculator.index');
+
+    // ==== Budgeting ====
+    Route::get('/budgets', [\App\Http\Controllers\Web\BudgetController::class, 'index'])->name('budgets.index');
+    Route::post('/budgets', [\App\Http\Controllers\Web\BudgetController::class, 'store'])->name('budgets.store');
+    Route::delete('/budgets/{budget}', [\App\Http\Controllers\Web\BudgetController::class, 'destroy'])->name('budgets.destroy');
+
     // ==== Nongkrong (patungan) ====
     Route::get('/nongkrong', [NongkrongController::class, 'index'])->name('nongkrong.index');
     Route::get('/nongkrong/create', [NongkrongController::class, 'create'])->name('nongkrong.create');

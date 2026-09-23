@@ -71,4 +71,6 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/sessions/{session}/debts/{debt}/payments/{payment}/confirm', [DebtController::class, 'confirmPayment']);
     Route::post('/sessions/{session}/debts/{debt}/payments/{payment}/reject', [DebtController::class, 'rejectPayment']);
     Route::post('/sessions/{session}/debts/{debt}/settle', [DebtController::class, 'settle']);
+
+    Route::post('/calculate-split', [\App\Http\Controllers\Api\QuickCalculatorController::class, 'calculate']);
 });
