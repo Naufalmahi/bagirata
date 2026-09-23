@@ -244,11 +244,7 @@ class WebTest extends TestCase
         $this->assertAuthenticated();
     }
 
-<<<<<<< HEAD
-    public function test_lapor_dan_konfirmasi_debt_lewat_web(): void
-=======
     public function test_settle_debt_lewat_web(): void
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
     {
         $a = User::factory()->create();
         $b = User::factory()->create();
@@ -274,125 +270,9 @@ class WebTest extends TestCase
 
         $debt = $session->debts()->where('status', 'pending')->firstOrFail();
 
-<<<<<<< HEAD
-        $this->actingAs($b)->post(route('debts.payments.store', [$session, $debt]), [
-            'amount' => 20_000,
-            'method' => 'cash',
-        ])->assertRedirect();
-
-        $payment = $debt->payments()->firstOrFail();
-
-        $this->actingAs($a)->post(route('debts.payments.confirm', [$session, $debt, $payment]), [
-            'decision' => 'confirmed',
-        ])->assertRedirect();
-
-        $this->assertDatabaseHas('debts', ['id' => $debt->id, 'status' => 'settled']);
-    }
-
-    public function test_debt_section_di_halaman_session(): void
-    {
-        $a = User::factory()->create();
-        $b = User::factory()->create();
-
-        $session = SessionService::create($a, [
-            'name' => 'Hitung',
-            'date' => now()->format('Y-m-d'),
-            'member_ids' => [$b->id],
-        ]);
-
-        $this->actingAs($a)->post(route('expenses.store', $session), [
-            'name' => 'Nasi rame',
-            'amount' => 40_000,
-            'paid_by_user_id' => $a->id,
-            'category' => 'makan',
-            'discount_type' => 'fixed',
-            'discount_value' => 0,
-            'service_rate' => 0,
-            'tax_rate' => 0,
-            'split_type' => 'equal',
-            'participant_ids' => [$a->id, $b->id],
-        ]);
-
-        $this->actingAs($b)->get(route('nongkrong.show', $session))
-            ->assertOk()
-            ->assertSee('Utang-piutang')
-            ->assertSee(route('debts.index', $session));
-
-        $this->actingAs($b)->get(route('debts.index', $session))
-            ->assertOk()
-            ->assertSee('Kamu harus bayar');
-
-        $this->actingAs($b)->get(route('debts.show', [$session, $session->debts()->first()]))
-            ->assertOk()
-            ->assertSee('Udah bayar');
-    }
-
-    public function test_halaman_overview_menampilkan_utang_semua_session(): void
-    {
-        $a = User::factory()->create();
-        $b = User::factory()->create();
-        $c = User::factory()->create();
-        $outsider = User::factory()->create();
-
-        // Session 1: A bayar 40k equal 2 orang → B utang 20k ke A
-        $satu = SessionService::create($a, [
-            'name' => 'Makan Rawon',
-            'date' => now()->format('Y-m-d'),
-            'member_ids' => [$b->id],
-        ]);
-        $this->actingAs($a)->post(route('expenses.store', $satu), [
-            'name' => 'Rawon rame',
-            'amount' => 40_000,
-            'paid_by_user_id' => $a->id,
-            'category' => 'makan',
-            'discount_type' => 'fixed',
-            'discount_value' => 0,
-            'service_rate' => 0,
-            'tax_rate' => 0,
-            'split_type' => 'equal',
-            'participant_ids' => [$a->id, $b->id],
-        ]);
-
-        // Session 2: C bayar 30k equal 2 orang → A utang 15k ke C
-        $dua = SessionService::create($c, [
-            'name' => 'Ngopi Dulu',
-            'date' => now()->format('Y-m-d'),
-            'member_ids' => [$a->id],
-        ]);
-        $this->actingAs($c)->post(route('expenses.store', $dua), [
-            'name' => 'Kopi susu',
-            'amount' => 30_000,
-            'paid_by_user_id' => $c->id,
-            'category' => 'minum',
-            'discount_type' => 'fixed',
-            'discount_value' => 0,
-            'service_rate' => 0,
-            'tax_rate' => 0,
-            'split_type' => 'equal',
-            'participant_ids' => [$c->id, $a->id],
-        ]);
-
-        // A: terima 20k dari session 1, bayar 15k di session 2 → dua-duanya keliatan
-        $this->actingAs($a)->get(route('debts.overview'))
-            ->assertOk()
-            ->assertSee('Kamu harus bayar')
-            ->assertSee('20.000', false)
-            ->assertSee('15.000', false)
-            ->assertSee('Makan Rawon')
-            ->assertSee('Ngopi Dulu');
-
-        // Outsider (nggak di session mana pun) → kosong
-        $this->actingAs($outsider)->get(route('debts.overview'))
-            ->assertOk()
-            ->assertSee('Nggak ada utang aktif')
-            ->assertDontSee('Makan Rawon')
-            ->assertDontSee('Ngopi Dulu');
-    }
-=======
         $this->actingAs($b)->post(route('debts.settle', [$session, $debt]))
             ->assertRedirect();
 
         $this->assertDatabaseHas('debts', ['id' => $debt->id, 'status' => 'settled']);
     }
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 }

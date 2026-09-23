@@ -66,13 +66,8 @@ class SessionService
 
         $totalSpent = $session->expenses->sum(fn ($expense) => $expense->grandTotal());
         $pending = $session->debts
-<<<<<<< HEAD
             ->where('status', '!=', DebtStatus::SETTLED->value)
             ->sum(fn ($debt) => $debt->outstanding());
-=======
-            ->where('status', DebtStatus::PENDING->value)
-            ->sum('amount');
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 
         return [
             'status' => $session->status(),

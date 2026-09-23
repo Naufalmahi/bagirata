@@ -358,15 +358,15 @@ class DebtPaymentTest extends TestCase
         ])->assertStatus(422);
     }
 
-    public function test_endpoint_settle_lama_sudah_dihapus(): void
+    public function test_endpoint_settle_masih_bisa_dipakai(): void
     {
         [$a, $b, $session] = $this->sessionDenganUtang(100_000);
 
         $debt = $session->debts()->where('from_user_id', $b->id)->firstOrFail();
 
         $this->apiAs($b);
-        $this->postJson("/api/v1/sessions/{$session->id}/debts/{$debt->id}/settle")->assertNotFound();
-        $this->assertDatabaseHas('debts', ['id' => $debt->id, 'status' => 'pending']);
+        $this->postJson("/api/v1/sessions/{$session->id}/debts/{$debt->id}/settle")->assertOk();
+        $this->assertDatabaseHas('debts', ['id' => $debt->id, 'status' => 'settled']);
     }
 
     private function sessionDenganUtang(int $amount): array

@@ -65,13 +65,10 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::delete('/sessions/{session}/expenses/{expense}', [ExpenseController::class, 'destroy']);
 
     // Debt
-<<<<<<< HEAD
     Route::get('/sessions/{session}/debts', [DebtController::class, 'index']);
     Route::get('/sessions/{session}/debts/{debt}', [DebtController::class, 'show']);
     Route::post('/sessions/{session}/debts/{debt}/payments', [DebtController::class, 'reportPayment']);
     Route::post('/sessions/{session}/debts/{debt}/payments/{payment}/confirm', [DebtController::class, 'confirmPayment']);
     Route::post('/sessions/{session}/debts/{debt}/payments/{payment}/reject', [DebtController::class, 'rejectPayment']);
-=======
     Route::post('/sessions/{session}/debts/{debt}/settle', [DebtController::class, 'settle']);
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 });

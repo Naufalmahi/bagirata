@@ -58,23 +58,14 @@ class SessionResource extends JsonResource
     private function basicSummary(NongkrongSession $session): array
     {
         $allExpenses = $session->expenses;
-<<<<<<< HEAD
         $activeDebtTotal = $this->activeDebtTotal($session);
-=======
-        $debts = $session->debts;
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 
         return [
             'total_expense_count' => $allExpenses->count(),
             'total_spent' => $allExpenses->sum(fn ($e) => $e->grandTotal()),
             'total_spent_formatted' => Money::format($allExpenses->sum(fn ($e) => $e->grandTotal())),
-<<<<<<< HEAD
             'pending_debt_total' => $activeDebtTotal,
             'pending_debt_total_formatted' => Money::format($activeDebtTotal),
-=======
-            'pending_debt_total' => $debts->where('status', DebtStatus::PENDING->value)->sum('amount'),
-            'pending_debt_total_formatted' => Money::format($debts->where('status', DebtStatus::PENDING->value)->sum('amount')),
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
         ];
     }
 
@@ -82,27 +73,18 @@ class SessionResource extends JsonResource
     {
         $balances = \App\Services\DebtService::netBalances($session);
         $viewerBalance = $balances[$this->viewerId] ?? 0;
-<<<<<<< HEAD
         $activeDebtTotal = $this->activeDebtTotal($session);
-=======
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 
         return [
             'total_spent' => $session->expenses->sum(fn ($e) => $e->grandTotal()),
             'total_spent_formatted' => Money::format($session->expenses->sum(fn ($e) => $e->grandTotal())),
-<<<<<<< HEAD
             'total_pending' => $activeDebtTotal,
             'total_pending_formatted' => Money::format($activeDebtTotal),
-=======
-            'total_pending' => $session->debts->where('status', DebtStatus::PENDING->value)->sum('amount'),
-            'total_pending_formatted' => Money::format($session->debts->where('status', DebtStatus::PENDING->value)->sum('amount')),
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
             'viewer_balance' => $viewerBalance,
             'viewer_balance_formatted' => Money::format(abs($viewerBalance)),
             'viewer_role' => $viewerBalance > 0 ? 'creditor' : ($viewerBalance < 0 ? 'debtor' : 'neutral'),
         ];
     }
-<<<<<<< HEAD
 
     private function activeDebtTotal(NongkrongSession $session): int
     {
@@ -110,6 +92,4 @@ class SessionResource extends JsonResource
             ->where('status', '!=', DebtStatus::SETTLED->value)
             ->sum(fn ($debt) => $debt->outstanding());
     }
-=======
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 }

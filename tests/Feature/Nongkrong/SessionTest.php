@@ -172,11 +172,8 @@ class SessionTest extends TestCase
         $this->assertDatabaseCount('expense_splits', 0);
     }
 
-<<<<<<< HEAD
-    public function test_lapor_bayar_oleh_debtor_lalu_kreditur_konfirmasi(): void
-=======
+
     public function test_settle_debt_oleh_debtor_saja(): void
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
     {
         $a = User::factory()->create();
         $b = User::factory()->create();
@@ -200,32 +197,6 @@ class SessionTest extends TestCase
 
         $debtToB = $session->debts()->where('from_user_id', $b->id)->where('status', 'pending')->firstOrFail();
 
-<<<<<<< HEAD
-        // Orang lain (c) nggak boleh lapor bayar utang b
-        $this->apiAs($c);
-        $this->postJson("/api/v1/sessions/{$session->id}/debts/{$debtToB->id}/payments", [
-            'amount' => 50_000,
-            'method' => 'cash',
-        ])->assertForbidden();
-
-        // Si b sendiri boleh lapor
-        $this->apiAs($b);
-        $report = $this->postJson("/api/v1/sessions/{$session->id}/debts/{$debtToB->id}/payments", [
-            'amount' => 50_000,
-            'method' => 'cash',
-        ]);
-        $report->assertCreated()->assertJsonPath('data.status', 'pending');
-        $this->assertDatabaseHas('debts', ['id' => $debtToB->id, 'status' => 'payment_reported']);
-
-        // Kreditur a yang konfirmasi → settled
-        $this->apiAs($a);
-        $this->postJson(
-            "/api/v1/sessions/{$session->id}/debts/{$debtToB->id}/payments/{$report->json('data.id')}/confirm",
-            ['decision' => 'confirmed']
-        )->assertOk()->assertJsonPath('data.status', 'settled');
-
-        $this->assertDatabaseHas('debts', ['id' => $debtToB->id, 'status' => 'settled', 'settled_by_user_id' => $a->id]);
-=======
         // Orang lain (c) nggak boleh settle utang b
         $this->apiAs($c);
         $this->postJson("/api/v1/sessions/{$session->id}/debts/{$debtToB->id}/settle")
@@ -237,7 +208,6 @@ class SessionTest extends TestCase
         $settle->assertOk()->assertJsonPath('data.status', 'settled');
 
         $this->assertDatabaseHas('debts', ['id' => $debtToB->id, 'status' => 'settled', 'settled_by_user_id' => $b->id]);
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
     }
 
     public function test_semua_debt_settled_status_beres(): void
@@ -264,20 +234,7 @@ class SessionTest extends TestCase
         $debt = $session->debts()->where('status', 'pending')->firstOrFail();
 
         $this->apiAs($b);
-<<<<<<< HEAD
-        $report = $this->postJson("/api/v1/sessions/{$session->id}/debts/{$debt->id}/payments", [
-            'amount' => 50_000,
-            'method' => 'cash',
-        ])->assertCreated();
-
-        $this->apiAs($a);
-        $this->postJson(
-            "/api/v1/sessions/{$session->id}/debts/{$debt->id}/payments/{$report->json('data.id')}/confirm",
-            ['decision' => 'confirmed']
-        );
-=======
         $this->postJson("/api/v1/sessions/{$session->id}/debts/{$debt->id}/settle");
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 
         $this->getJson("/api/v1/sessions/{$session->id}")
             ->assertJsonPath('data.status', 'settled');

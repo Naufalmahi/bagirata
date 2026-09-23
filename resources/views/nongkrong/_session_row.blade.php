@@ -1,9 +1,5 @@
 @php
-<<<<<<< HEAD
     $pending = $session->debts->where('status', '!=', \App\Enums\DebtStatus::SETTLED->value)->sum(fn ($debt) => $debt->outstanding());
-=======
-    $pending = $session->debts->where('status', 'pending')->sum('amount');
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
     $status = $session->status();
 @endphp
 <a href="{{ route('nongkrong.show', $session) }}"

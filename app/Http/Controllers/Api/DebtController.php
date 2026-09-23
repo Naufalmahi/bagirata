@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-<<<<<<< HEAD
 use App\Http\Requests\Debts\ReviewDebtPaymentRequest;
 use App\Http\Requests\Debts\StoreDebtPaymentRequest;
 use App\Http\Resources\DebtPaymentResource;
@@ -13,17 +12,11 @@ use App\Models\DebtPayment;
 use App\Models\NongkrongSession;
 use App\Services\DebtPaymentService;
 use App\Services\Support\Money;
-=======
-use App\Http\Resources\DebtResource;
-use App\Models\Debt;
-use App\Models\NongkrongSession;
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 
 class DebtController extends Controller
 {
-<<<<<<< HEAD
     public function index(Request $request, NongkrongSession $session)
     {
         $this->authorize('view', $session);
@@ -50,17 +43,11 @@ class DebtController extends Controller
     public function show(Request $request, NongkrongSession $session, Debt $debt)
     {
         $this->authorize('view', $debt);
-=======
-    public function settle(Request $request, NongkrongSession $session, Debt $debt)
-    {
-        $this->authorize('settle', $debt);
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 
         if ($debt->nongkrong_session_id !== $session->id) {
             abort(404);
         }
 
-<<<<<<< HEAD
         $debt->load(['debtor', 'creditor', 'settler', 'session', 'payments.reporter', 'payments.reviewer']);
 
         return ApiResponse::success(new DebtResource($debt), '');
@@ -124,9 +111,20 @@ class DebtController extends Controller
         );
     }
 
-    /**
-     * @return array{0: int, 1: int, 2: int, 3: int}
-     */
+    public function settle(Request $request, NongkrongSession $session, Debt $debt)
+    {
+        $this->authorize('settle', $debt);
+
+        if ($debt->nongkrong_session_id !== $session->id) {
+            abort(404);
+        }
+
+        $debt->markSettled($request->user());
+        $debt->load(['debtor', 'creditor', 'settler']);
+
+        return ApiResponse::success(new DebtResource($debt), 'Udah ditandain bayar. Enak banget, nggak ada utang lagi. Hehe.');
+    }
+
     private function dashboardStats(NongkrongSession $session, int $viewerId): array
     {
         $debts = $session->debts()->with(['debtor', 'creditor', 'settler', 'payments'])->get();
@@ -162,11 +160,5 @@ class DebtController extends Controller
         }
 
         return $request->file('proof_photo')->store('payment-proofs', 'public');
-=======
-        $debt->markSettled($request->user());
-        $debt->load(['debtor', 'creditor', 'settler']);
-
-        return ApiResponse::success(new DebtResource($debt), 'Udah ditandain bayar. Enak banget, nggak ada utang lagi. Hehe.');
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
     }
 }

@@ -4,10 +4,7 @@ namespace App\Services;
 
 use App\Enums\DebtStatus;
 use App\Models\ActivityLog;
-<<<<<<< HEAD
 use App\Models\Debt;
-=======
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 use App\Models\NongkrongSession;
 
 /**
@@ -93,7 +90,6 @@ class DebtService
     }
 
     /**
-<<<<<<< HEAD
      * Total yang masih wajib dibayar (semua debt aktif, termasuk outstanding cicilan).
      */
     public static function activeOutstandingTotal(NongkrongSession $session): int
@@ -114,15 +110,10 @@ class DebtService
      *   supaya debt yang udah lunas nggak "hidup lagi" pas dihitung ulang.
      * - Debt PENDING/REJECTED yang punya histori pembayaran di-soft-delete
      *   (histori payment tetap kekirim). Yang tanpa histori di-hard-delete.
-=======
-     * Ganti semua debt PENDING dengan hasil hitung terbaru.
-     * Debt yang udah SETTLED sengaja dipertahankan sebagai histori/audit.
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
      */
     public static function regenerateFor(NongkrongSession $session): void
     {
         $balances = self::netBalances($session);
-<<<<<<< HEAD
 
         // 1. Lock in-flight + settled, kurangi balance dari yang udah beres/sedang berjalan.
         $locked = $session->debts()
@@ -151,13 +142,6 @@ class DebtService
 
         // 3. Greedy residual → debt PENDING baru.
         $newDebts = self::debtsFromBalances($balances);
-
-=======
-        $newDebts = self::debtsFromBalances($balances);
-
-        $session->debts()->where('status', DebtStatus::PENDING->value)->delete();
-
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
         foreach ($newDebts as $debt) {
             $session->debts()->create([
                 'from_user_id' => $debt['from'],
@@ -167,7 +151,6 @@ class DebtService
             ]);
         }
 
-<<<<<<< HEAD
         // 4. Audit ringkas: debt_created (kebetulan baru) atau debt_adjusted.
         self::auditRegeneration($session, $redeemable->count(), count($newDebts));
     }
@@ -185,15 +168,6 @@ class DebtService
             'auditable_type' => NongkrongSession::class,
             'auditable_id' => $session->id,
             'properties' => ['before' => $before, 'after' => $after],
-=======
-        ActivityLog::create([
-            'user_id' => auth()->id(),
-            'event' => 'debt_recomputed',
-            'description' => 'Debt dihitung ulang ('.count($newDebts).' kewajiban).',
-            'auditable_type' => NongkrongSession::class,
-            'auditable_id' => $session->id,
-            'properties' => ['total' => array_sum(array_column($newDebts, 'amount'))],
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
         ]);
     }
 }

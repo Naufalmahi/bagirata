@@ -76,7 +76,6 @@
                             </div>
                             <p class="mt-0.5 text-sm text-slate-500">
                                 {{ $session->date?->format('D, d M Y') }} · {{ $session->members_count }} orang ·
-<<<<<<< HEAD
                                 @php $pending = $session->debts->where('status', '!=', \App\Enums\DebtStatus::SETTLED->value)->sum(fn ($d) => $d->outstanding()); @endphp
                                 @if ($pending > 0)
                                     <span class="font-semibold text-amber-600">pending {{ number_format($pending, 0, ',', '.') }}</span>
@@ -84,13 +83,6 @@
                                     <span class="font-semibold text-emerald-600">beres semua</span>
                                 @else
                                     <span class="font-semibold text-slate-400">belum ada pengeluaran</span>
-=======
-                                @php $pending = $session->debts->where('status', 'pending')->sum('amount'); @endphp
-                                @if ($pending > 0)
-                                    <span class="font-semibold text-amber-600">pending {{ number_format($pending, 0, ',', '.') }}</span>
-                                @else
-                                    <span class="font-semibold text-emerald-600">{{ $session->status() === 'settled' ? 'beres semua' : 'belum ada pengeluaran' }}</span>
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
                                 @endif
                             </p>
                         </div>

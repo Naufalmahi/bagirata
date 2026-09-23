@@ -3,22 +3,16 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-<<<<<<< HEAD
 use App\Http\Requests\Debts\ReviewDebtPaymentRequest;
 use App\Http\Requests\Debts\StoreDebtPaymentRequest;
 use App\Models\Debt;
 use App\Models\DebtPayment;
 use App\Models\NongkrongSession;
 use App\Services\DebtPaymentService;
-=======
-use App\Models\Debt;
-use App\Models\NongkrongSession;
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 use Illuminate\Http\Request;
 
 class DebtController extends Controller
 {
-<<<<<<< HEAD
     public function index(Request $request, NongkrongSession $session)
     {
         $this->authorize('view', $session);
@@ -77,73 +71,26 @@ class DebtController extends Controller
     public function show(Request $request, NongkrongSession $session, Debt $debt)
     {
         $this->authorize('view', $debt);
-=======
-    public function settle(Request $request, NongkrongSession $session, Debt $debt)
-    {
-        $this->authorize('settle', $debt);
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 
         if ($debt->nongkrong_session_id !== $session->id) {
             abort(404);
         }
 
-<<<<<<< HEAD
         $debt->load(['debtor', 'creditor', 'settler', 'payments.reporter', 'payments.reviewer']);
 
         return view('debts.show', compact('session', 'debt'));
     }
 
-    public function reportPayment(StoreDebtPaymentRequest $request, NongkrongSession $session, Debt $debt)
+    public function settle(Request $request, NongkrongSession $session, Debt $debt)
     {
+        $this->authorize('settle', $debt);
+
         if ($debt->nongkrong_session_id !== $session->id) {
             abort(404);
         }
 
-        $proofPath = $this->storeProof($request);
-        DebtPaymentService::report($request->user(), $debt, $request->validated(), $proofPath);
-
-        return redirect()->route('debts.show', [$session, $debt])
-            ->with('success', 'Lapor bayar kesimpen. Tinggal nunggu kreditur konfirmasi.');
-    }
-
-    public function confirmPayment(ReviewDebtPaymentRequest $request, NongkrongSession $session, Debt $debt, DebtPayment $payment)
-    {
-        if ($debt->nongkrong_session_id !== $session->id || $payment->debt_id !== $debt->id) {
-            abort(404);
-        }
-
-        $debt = DebtPaymentService::confirm($request->user(), $debt, $payment, $request->input('review_note'));
-
-        $message = $debt->isSettled()
-            ? 'Pembayaran dikonfirmasi. Semua aman, utang udah rata!'
-            : 'Pembayaran dikonfirmasi, sisa cicilan lanjut lagi.';
-
-        return redirect()->route('debts.show', [$session, $debt])->with('success', $message);
-    }
-
-    public function rejectPayment(ReviewDebtPaymentRequest $request, NongkrongSession $session, Debt $debt, DebtPayment $payment)
-    {
-        if ($debt->nongkrong_session_id !== $session->id || $payment->debt_id !== $debt->id) {
-            abort(404);
-        }
-
-        DebtPaymentService::reject($request->user(), $debt, $payment, $request->input('review_note', ''));
-
-        return redirect()->route('debts.show', [$session, $debt])
-            ->with('success', 'Pembayaran ditolak.');
-    }
-
-    private function storeProof(Request $request): ?string
-    {
-        if (! $request->hasFile('proof_photo')) {
-            return null;
-        }
-
-        return $request->file('proof_photo')->store('payment-proofs', 'public');
-=======
         $debt->markSettled($request->user());
 
         return back()->with('success', 'Utang ditandain lunas. Lega banget.');
->>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
     }
 }
