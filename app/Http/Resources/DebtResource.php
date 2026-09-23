@@ -2,7 +2,10 @@
 
 namespace App\Http\Resources;
 
+<<<<<<< HEAD
 use App\Enums\DebtStatus;
+=======
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 use App\Services\Support\Money;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -11,16 +14,22 @@ class DebtResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+<<<<<<< HEAD
         $status = DebtStatus::tryFrom($this->status) ?? DebtStatus::PENDING;
 
         return [
             'id' => $this->id,
             'session_id' => $this->nongkrong_session_id,
             'source' => $this->whenLoaded('session', fn () => $this->session->name),
+=======
+        return [
+            'id' => $this->id,
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
             'from' => new UserResource($this->whenLoaded('debtor')),
             'to' => new UserResource($this->whenLoaded('creditor')),
             'amount' => $this->amount,
             'amount_formatted' => Money::format($this->amount),
+<<<<<<< HEAD
             'paid_amount' => $this->paid_amount,
             'paid_amount_formatted' => Money::format($this->paid_amount),
             'remaining_amount' => $this->outstanding(),
@@ -34,6 +43,13 @@ class DebtResource extends JsonResource
             'settled_at' => $this->settled_at?->toIso8601String(),
             'settled_by' => new UserResource($this->whenLoaded('settler')),
             'created_at' => $this->created_at?->toIso8601String(),
+=======
+            'status' => $this->status,
+            'status_label' => \App\Enums\DebtStatus::tryFrom($this->status)?->label(),
+            'can_settle' => $request->user()?->id === $this->from_user_id && $this->status === 'pending',
+            'settled_at' => $this->settled_at?->toIso8601String(),
+            'settled_by' => new UserResource($this->whenLoaded('settler')),
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
         ];
     }
 }

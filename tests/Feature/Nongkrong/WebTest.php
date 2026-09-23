@@ -244,7 +244,11 @@ class WebTest extends TestCase
         $this->assertAuthenticated();
     }
 
+<<<<<<< HEAD
     public function test_lapor_dan_konfirmasi_debt_lewat_web(): void
+=======
+    public function test_settle_debt_lewat_web(): void
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
     {
         $a = User::factory()->create();
         $b = User::factory()->create();
@@ -270,6 +274,7 @@ class WebTest extends TestCase
 
         $debt = $session->debts()->where('status', 'pending')->firstOrFail();
 
+<<<<<<< HEAD
         $this->actingAs($b)->post(route('debts.payments.store', [$session, $debt]), [
             'amount' => 20_000,
             'method' => 'cash',
@@ -383,4 +388,11 @@ class WebTest extends TestCase
             ->assertDontSee('Makan Rawon')
             ->assertDontSee('Ngopi Dulu');
     }
+=======
+        $this->actingAs($b)->post(route('debts.settle', [$session, $debt]))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('debts', ['id' => $debt->id, 'status' => 'settled']);
+    }
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 }

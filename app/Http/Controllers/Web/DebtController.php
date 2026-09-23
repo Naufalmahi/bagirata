@@ -3,16 +3,22 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+<<<<<<< HEAD
 use App\Http\Requests\Debts\ReviewDebtPaymentRequest;
 use App\Http\Requests\Debts\StoreDebtPaymentRequest;
 use App\Models\Debt;
 use App\Models\DebtPayment;
 use App\Models\NongkrongSession;
 use App\Services\DebtPaymentService;
+=======
+use App\Models\Debt;
+use App\Models\NongkrongSession;
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 use Illuminate\Http\Request;
 
 class DebtController extends Controller
 {
+<<<<<<< HEAD
     public function index(Request $request, NongkrongSession $session)
     {
         $this->authorize('view', $session);
@@ -71,11 +77,17 @@ class DebtController extends Controller
     public function show(Request $request, NongkrongSession $session, Debt $debt)
     {
         $this->authorize('view', $debt);
+=======
+    public function settle(Request $request, NongkrongSession $session, Debt $debt)
+    {
+        $this->authorize('settle', $debt);
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 
         if ($debt->nongkrong_session_id !== $session->id) {
             abort(404);
         }
 
+<<<<<<< HEAD
         $debt->load(['debtor', 'creditor', 'settler', 'payments.reporter', 'payments.reviewer']);
 
         return view('debts.show', compact('session', 'debt'));
@@ -128,5 +140,10 @@ class DebtController extends Controller
         }
 
         return $request->file('proof_photo')->store('payment-proofs', 'public');
+=======
+        $debt->markSettled($request->user());
+
+        return back()->with('success', 'Utang ditandain lunas. Lega banget.');
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
     }
 }

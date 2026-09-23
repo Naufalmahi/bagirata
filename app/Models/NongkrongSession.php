@@ -71,7 +71,11 @@ class NongkrongSession extends Model
             return 'draft';
         }
 
+<<<<<<< HEAD
         return $this->debts()->where('status', '!=', DebtStatus::SETTLED->value)->exists() ? 'active' : 'settled';
+=======
+        return $this->debts()->where('status', DebtStatus::PENDING->value)->exists() ? 'active' : 'settled';
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
     }
 
     public function statusLabel(): string

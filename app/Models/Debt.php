@@ -7,18 +7,28 @@ use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+<<<<<<< HEAD
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Debt extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
+=======
+
+class Debt extends Model
+{
+    use HasFactory, LogsActivity;
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 
     protected $fillable = [
         'nongkrong_session_id',
         'from_user_id',
         'to_user_id',
         'amount',
+<<<<<<< HEAD
         'paid_amount',
+=======
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
         'status',
         'note',
         'settled_at',
@@ -27,7 +37,10 @@ class Debt extends Model
 
     protected $casts = [
         'amount' => 'integer',
+<<<<<<< HEAD
         'paid_amount' => 'integer',
+=======
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
         'settled_at' => 'datetime',
     ];
 
@@ -51,6 +64,7 @@ class Debt extends Model
         return $this->belongsTo(User::class, 'settled_by_user_id');
     }
 
+<<<<<<< HEAD
     public function payments()
     {
         return $this->hasMany(DebtPayment::class)->latest();
@@ -61,6 +75,8 @@ class Debt extends Model
         return $this->hasMany(DebtPayment::class)->where('status', \App\Enums\PaymentReportStatus::CONFIRMED->value);
     }
 
+=======
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
     public function scopePending(Builder $query): Builder
     {
         return $query->where('status', DebtStatus::PENDING->value);
@@ -71,6 +87,7 @@ class Debt extends Model
         return $query->where('status', DebtStatus::SETTLED->value);
     }
 
+<<<<<<< HEAD
     public function scopeInFlight(Builder $query): Builder
     {
         return $query->whereIn('status', [
@@ -124,6 +141,8 @@ class Debt extends Model
     /**
      * Mark debt lunas. Only called from DebtPaymentService (bukan self-confirm bebas).
      */
+=======
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
     public function markSettled(?User $by = null): void
     {
         $this->status = DebtStatus::SETTLED->value;

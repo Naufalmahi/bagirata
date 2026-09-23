@@ -24,8 +24,11 @@
                         class="rounded-lg px-3 py-1.5 {{ str_starts_with($active, 'groups') ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Groups</a>
                     <a href="{{ route('nongkrong.index') }}"
                         class="rounded-lg px-3 py-1.5 {{ str_starts_with($active, 'nongkrong') ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Nongkrong</a>
+<<<<<<< HEAD
                     <a href="{{ route('debts.overview') }}"
                         class="rounded-lg px-3 py-1.5 {{ str_starts_with($active, 'debts') ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Utang-Piutang</a>
+=======
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
                 </div>
 
                 <div class="flex items-center gap-2">

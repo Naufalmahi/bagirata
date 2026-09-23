@@ -56,6 +56,7 @@
         <div class="space-y-6 lg:col-span-2">
             {{-- Debts --}}
             <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+<<<<<<< HEAD
                 <div class="flex items-center justify-between">
                     <h2 class="font-bold text-slate-900">Utang-piutang</h2>
                     <a href="{{ route('debts.index', $session) }}" class="text-sm font-semibold text-indigo-600 hover:underline">Kelola →</a>
@@ -63,6 +64,12 @@
 
                 @php
                     $pendingDebts = $session->debts->where('status', '!=', 'settled')->sortBy('amount');
+=======
+                <h2 class="font-bold text-slate-900">Utang-piutang</h2>
+
+                @php
+                    $pendingDebts = $session->debts->where('status', 'pending')->sortBy('amount');
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
                     $settledDebts = $session->debts->where('status', 'settled')->sortBy('settled_at');
                 @endphp
 
@@ -71,6 +78,7 @@
                 @else
                     <ul class="mt-3 divide-y divide-slate-100">
                         @foreach ($pendingDebts as $debt)
+<<<<<<< HEAD
                             @php
                                 $badge = match ($debt->status) {
                                     'payment_reported' => ['bg-amber-50 text-amber-700', 'Nunggu konfirmasi'],
@@ -96,6 +104,25 @@
                                         {{ $me === $debt->from_user_id ? 'Udah bayar? Lapor' : 'Detail' }}
                                     </a>
                                 </div>
+=======
+                            @php $canSettle = $me === $debt->from_user_id; @endphp
+                            <li class="flex flex-wrap items-center justify-between gap-2 py-3">
+                                <p class="text-sm text-slate-700">
+                                    @if ($debt->from_user_id === $me)
+                                        Lu utang <strong class="text-rose-600">{{ number_format($debt->amount, 0, ',', '.') }}</strong> ke <strong>{{ $debt->creditor->name }}</strong>
+                                    @elseif ($debt->to_user_id === $me)
+                                        <strong>{{ $debt->debtor->name }}</strong> utang <strong class="text-emerald-600">{{ number_format($debt->amount, 0, ',', '.') }}</strong> ke lu
+                                    @else
+                                        <strong>{{ $debt->debtor->name }}</strong> utang <strong>{{ number_format($debt->amount, 0, ',', '.') }}</strong> ke <strong>{{ $debt->creditor->name }}</strong>
+                                    @endif
+                                </p>
+                                @if ($canSettle)
+                                    <form method="POST" action="{{ route('debts.settle', [$session, $debt]) }}">
+                                        @csrf
+                                        <button class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">Udah ku bayar ✓</button>
+                                    </form>
+                                @endif
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
                             </li>
                         @endforeach
                     </ul>

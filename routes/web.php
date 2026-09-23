@@ -76,10 +76,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/nongkrong/{session}/expenses/{expense}', [ExpenseController::class, 'cancel'])->name('expenses.cancel');
 
     // ==== Debts ====
+<<<<<<< HEAD
     Route::get('/debts', [DebtController::class, 'overview'])->name('debts.overview');
     Route::get('/nongkrong/{session}/debts', [DebtController::class, 'index'])->name('debts.index');
     Route::get('/nongkrong/{session}/debts/{debt}', [DebtController::class, 'show'])->name('debts.show');
     Route::post('/nongkrong/{session}/debts/{debt}/payments', [DebtController::class, 'reportPayment'])->name('debts.payments.store');
     Route::post('/nongkrong/{session}/debts/{debt}/payments/{payment}/confirm', [DebtController::class, 'confirmPayment'])->name('debts.payments.confirm');
     Route::post('/nongkrong/{session}/debts/{debt}/payments/{payment}/reject', [DebtController::class, 'rejectPayment'])->name('debts.payments.reject');
+=======
+    Route::post('/nongkrong/{session}/debts/{debt}/settle', [DebtController::class, 'settle'])->name('debts.settle');
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 });

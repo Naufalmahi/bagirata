@@ -9,6 +9,7 @@ class DebtPolicy
 {
     public function view(User $user, Debt $debt): bool
     {
+<<<<<<< HEAD
         return $debt->session?->isMember($user) ?? false;
     }
 
@@ -36,5 +37,18 @@ class DebtPolicy
     private function review(User $user, Debt $debt): bool
     {
         return $debt->canCreditorReview($user);
+=======
+        return $debt->session->isMember($user);
+    }
+
+    /**
+     * Cuma yang punya kewajiban (debtor) yang boleh konfirmasi udah bayar.
+     */
+    public function settle(User $user, Debt $debt): bool
+    {
+        return $debt->from_user_id === $user->id
+            && $debt->session->isMember($user)
+            && $debt->status === \App\Enums\DebtStatus::PENDING->value;
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
     }
 }

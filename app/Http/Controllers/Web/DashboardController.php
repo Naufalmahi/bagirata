@@ -23,6 +23,7 @@ class DashboardController extends Controller
             ->loadCount(['expenses', 'members', 'debts']);
 
         $pendingTotal = $sessions
+<<<<<<< HEAD
             ->sum(fn ($session) => $session->debts
                 ->where('status', '!=', DebtStatus::SETTLED->value)
                 ->sum(fn ($debt) => $debt->outstanding()));
@@ -31,6 +32,12 @@ class DashboardController extends Controller
             ->sum(fn ($session) => $session->debts
                 ->where('status', '!=', DebtStatus::SETTLED->value)
                 ->count());
+=======
+            ->sum(fn ($session) => $session->debts->where('status', DebtStatus::PENDING->value)->sum('amount'));
+
+        $pendingCount = $sessions
+            ->sum(fn ($session) => $session->debts->where('status', DebtStatus::PENDING->value)->count());
+>>>>>>> 6561da739345e3ff0fdab546ef4f928a872f067a
 
         return view('dashboard', compact('groups', 'sessions', 'pendingTotal', 'pendingCount'));
     }
