@@ -10,6 +10,9 @@
 
         @php
             $participantIds = $expense->splits->pluck('user_id')->all();
+            // split_type disimpan per baris di expense_splits, bukan di tabel expenses.
+            // Semua baris berbagi nilai yang sama karena form cuma punya satu pilihan.
+            $currentSplitType = $expense->splits->first()?->split_type ?? \App\Enums\SplitType::EQUAL->value;
             $initial = [
                 'name' => old('name') ?? $expense->name,
                 'amount' => old('amount') ?? $expense->amount,
@@ -18,7 +21,7 @@
                 'discount_value' => old('discount_value') ?? $expense->discount_value,
                 'service_rate' => old('service_rate') ?? $expense->service_rate,
                 'tax_rate' => old('tax_rate') ?? $expense->tax_rate,
-                'split_type' => old('split_type') ?? $expense->split_type,
+                'split_type' => old('split_type') ?? $currentSplitType,
                 'paid_by' => old('paid_by_user_id') ?? $expense->paid_by_user_id,
                 'note' => old('note') ?? $expense->note,
                 'members' => $session->members->map(fn ($m) => ['id' => $m->id, 'name' => $m->name])->values()->all(),
