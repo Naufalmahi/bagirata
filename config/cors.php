@@ -19,7 +19,14 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    // Frontend Blade dilayani dari origin yang sama, jadi CORS secara normal
+    // tidak diperlukan. Daftar ini tetap wajib eksplisit (bukan '*') kalau
+    // supports_credentials aktif: kombinasi wildcard + kredensial tidak valid
+    // menurut spesifikasi CORS dan akan ditolak browser.
+    'allowed_origins' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('FRONTEND_URL', env('APP_URL', 'http://localhost')))
+    ))),
 
     'allowed_origins_patterns' => [],
 
@@ -29,6 +36,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];

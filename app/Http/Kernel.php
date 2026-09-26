@@ -39,7 +39,10 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            // Blade di origin yang sama memanggil /api/v1 lewat cookie sesi, jadi
+            // request dari domain stateful harus punya StartSession + CSRF.
+            // Tanpa ini friend picker dan kalkulator dapat 401 di browser.
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
