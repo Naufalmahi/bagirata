@@ -86,17 +86,46 @@ class SplitService
     /**
      * Dispatcher.
      *
+     * Untuk custom/percentage, key map wajib persis sama dengan daftar peserta.
+     * ExpenseService::create() mengambil participants dari key map, jadi map
+     * dengan key lain berarti orang yang nggak dipilih ikut dibebani utang.
+     *
      * @param  array<int, int>  $participantIds
      * @param  array<int, int>  $amountsOrPercent
      * @return array<int, int>
      */
     public static function split(string $splitType, int $grandTotal, array $participantIds, array $amountsOrPercent = []): array
     {
-        return match ($splitType) {
+        $shares = match ($splitType) {
             SplitType::EQUAL->value => self::equal($grandTotal, $participantIds),
             SplitType::PERCENTAGE->value => self::percentage($grandTotal, $amountsOrPercent),
             SplitType::CUSTOM->value => self::custom($grandTotal, $amountsOrPercent),
             default => throw new InvalidArgumentException('Metode split nggak dikenal.'),
         };
+
+        if ($splitType !== SplitType::EQUAL->value) {
+            self::assertKeysAreParticipants($shares, $participantIds);
+        }
+
+        return $shares;
+    }
+
+    /**
+     * @param  array<int, int>  $shares
+     * @param  array<int, int>  $participantIds
+     */
+    private static function assertKeysAreParticipants(array $shares, array $participantIds): void
+    {
+        $expected = array_map('intval', $participantIds);
+        $actual = array_map('intval', array_keys($shares));
+
+        sort($expected);
+        sort($actual);
+
+        if ($expected !== $actual) {
+            throw new InvalidArgumentException(
+                'Key nominal/persen harus sama persis dengan daftar peserta.'
+            );
+        }
     }
 }

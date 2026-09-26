@@ -61,8 +61,17 @@ abstract class ExpenseRequest extends FormRequest
                 $validator->errors()->add('discount_value', 'Discount nggak boleh lebih besar dari nominalnya.');
             }
 
-            if ($input['split_type'] === 'percentage' && array_sum($input['percentages'] ?? []) !== 100) {
-                $validator->errors()->add('percentages', 'Total persen harus pas 100.');
+            if ($input['split_type'] === 'percentage') {
+                if (array_sum($input['percentages'] ?? []) !== 100) {
+                    $validator->errors()->add('percentages', 'Total persen harus pas 100.');
+                }
+
+                $this->assertMapKeysMatchParticipants(
+                    $validator,
+                    $input['percentages'] ?? [],
+                    $participants,
+                    'percentages'
+                );
             }
 
             if ($input['split_type'] === 'custom') {
@@ -76,7 +85,40 @@ abstract class ExpenseRequest extends FormRequest
                 if ((array_sum($input['custom_amounts'] ?? [])) !== $grandTotal) {
                     $validator->errors()->add('custom_amounts', 'Total nominal harus pas sama grand total (Rp'.number_format($grandTotal, 0, ',', '.').').');
                 }
+
+                $this->assertMapKeysMatchParticipants(
+                    $validator,
+                    $input['custom_amounts'] ?? [],
+                    $participants,
+                    'custom_amounts'
+                );
             }
         });
+    }
+
+    /**
+     * Untuk split custom/percentage, key map = user id dan ExpenseService
+     * mengambil participants dari key itu, bukan dari participant_ids. Jadi
+     * key-nya WAJIB persis sama dengan participant_ids. Kalau tidak, validasi
+     * "peserta harus anggota session" bisa dilewati dan orang yang bukan
+     * anggota pun bisa dibebani utang.
+     *
+     * @param  array<int|string, mixed>  $map
+     * @param  array<int, int>  $participantIds
+     */
+    private function assertMapKeysMatchParticipants($validator, array $map, array $participantIds, string $field): void
+    {
+        $expected = array_map('intval', $participantIds);
+        $actual = array_map('intval', array_keys($map));
+
+        sort($expected);
+        sort($actual);
+
+        if ($expected !== $actual) {
+            $validator->errors()->add(
+                $field,
+                'Nominal/persen harus diisi tepat untuk setiap peserta yang dipilih.'
+            );
+        }
     }
 }
