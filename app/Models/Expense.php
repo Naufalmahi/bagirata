@@ -69,14 +69,22 @@ class Expense extends Model
         return CalculationService::discountAmount($this->amount, $this->discount_type, $this->discount_value);
     }
 
+    /**
+     * Nominal setelah discount, dasar perhitungan service charge dan pajak.
+     */
+    public function baseAfterDiscount(): int
+    {
+        return CalculationService::baseAfterDiscount($this->amount, $this->discount_type, $this->discount_value);
+    }
+
     public function serviceAmount(): int
     {
-        return CalculationService::serviceAmount($this->amount, $this->discountAmount(), $this->service_rate);
+        return CalculationService::serviceAmount($this->baseAfterDiscount(), $this->service_rate);
     }
 
     public function taxAmount(): int
     {
-        return CalculationService::taxAmount($this->amount, $this->discountAmount(), $this->serviceAmount(), $this->tax_rate);
+        return CalculationService::taxAmount($this->baseAfterDiscount(), $this->serviceAmount(), $this->tax_rate);
     }
 
     public function grandTotal(): int
