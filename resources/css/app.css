@@ -2,6 +2,387 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------
+   Design token
+   Nilai dalam bentuk "R G B" (tanpa kurung) supaya bisa disambung
+   ke alpha modifier Tailwind, mis. bg-surface/60.
+   ------------------------------------------------------------------ */
+@layer base {
+    :root {
+        --surface: 248 250 252; /* slate-50 */
+        --raised: 255 255 255; /* white */
+        --sunken: 241 245 249; /* slate-100 */
+        --line: 226 232 240; /* slate-200 */
+        --line-strong: 203 213 225; /* slate-300 */
+        --ink: 30 41 59; /* slate-800 */
+        --ink-muted: 100 116 139; /* slate-500 */
+        --ink-subtle: 148 163 184; /* slate-400 */
+
+        --brand: 79 70 229; /* indigo-600 */
+        --brand-hover: 67 56 202; /* indigo-700 */
+        --brand-soft: 238 242 255; /* indigo-50 */
+        --brand-text: 67 56 202; /* indigo-700 */
+
+        --success: 16 185 129;
+        --success-soft: 209 250 229;
+        --success-text: 6 95 70;
+        --warning: 245 158 11;
+        --warning-soft: 254 243 199;
+        --warning-text: 120 53 15;
+        --danger: 225 29 72;
+        --danger-soft: 255 228 230;
+        --danger-text: 136 19 55;
+        --info: 14 165 233;
+        --info-soft: 224 242 254;
+        --info-text: 7 89 133;
+    }
+
+    .dark {
+        --surface: 2 6 23; /* slate-950 */
+        --raised: 15 23 42; /* slate-900 */
+        --sunken: 30 41 59; /* slate-800 */
+        --line: 30 41 59; /* slate-800 */
+        --line-strong: 51 65 85; /* slate-700 */
+        --ink: 226 232 240; /* slate-200 */
+        --ink-muted: 148 163 184; /* slate-400 */
+        --ink-subtle: 100 116 139; /* slate-500 */
+
+        --brand: 129 140 248; /* indigo-400 */
+        --brand-hover: 165 180 252; /* indigo-300 */
+        --brand-soft: 30 27 75; /* indigo-950 */
+        --brand-text: 199 210 254; /* indigo-300 */
+
+        --success: 52 211 153;
+        --success-soft: 6 78 59;
+        --success-text: 110 231 183;
+        --warning: 251 191 36;
+        --warning-soft: 120 53 15;
+        --warning-text: 252 211 77;
+        --danger: 251 113 133;
+        --danger-soft: 136 19 55;
+        --danger-text: 253 164 175;
+        --info: 56 189 248;
+        --info-soft: 7 54 93;
+        --info-text: 125 211 252;
+    }
+
+    html {
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        @apply bg-surface text-ink font-sans antialiased;
+    }
+
+    ::selection {
+        @apply bg-brand/25;
+    }
+
+    /* Fokus keyboard harus kelihatan jelas di light maupun dark. */
+    :focus-visible {
+        @apply outline-none ring-2 ring-brand ring-offset-2 ring-offset-surface;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
+@layer components {
+    /* ---------------------------------------------------------
+       Tombol
+       --------------------------------------------------------- */
+    .btn {
+        @apply inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-control border border-transparent
+               px-4 py-2.5 text-sm font-semibold leading-none transition
+               disabled:pointer-events-none disabled:opacity-50;
+    }
+
+    .btn-primary {
+        @apply bg-brand text-white hover:bg-brand-hover active:scale-[0.98];
+    }
+
+    .btn-secondary {
+        @apply border border-line bg-raised text-ink hover:bg-sunken active:scale-[0.98];
+    }
+
+    .btn-ghost {
+        @apply text-ink-muted hover:bg-sunken hover:text-ink;
+    }
+
+    .btn-danger {
+        @apply bg-danger text-white hover:opacity-90 active:scale-[0.98];
+    }
+
+    .btn-sm {
+        @apply px-3 py-1.5 text-xs;
+    }
+
+    .btn-lg {
+        @apply px-6 py-3.5 text-base;
+    }
+
+    .btn-icon {
+        @apply h-9 w-9 p-0;
+    }
+
+    /* ---------------------------------------------------------
+       Permukaan
+       --------------------------------------------------------- */
+    .card {
+        @apply rounded-card border border-line bg-raised p-5 shadow-card;
+    }
+
+    .card-hover {
+        @apply transition hover:border-line-strong hover:shadow-card-hover;
+    }
+
+    .card-sunken {
+        @apply rounded-card border border-line bg-sunken p-4;
+    }
+
+    .brand-mark {
+        @apply grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand text-base font-extrabold text-white;
+    }
+
+    .avatar {
+        @apply grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-soft text-sm font-bold text-brand-text;
+    }
+
+    /* ---------------------------------------------------------
+       Form
+       --------------------------------------------------------- */
+    .label {
+        @apply mb-1.5 block text-sm font-semibold text-ink;
+    }
+
+    .input,
+    .select,
+    .textarea {
+        @apply block w-full rounded-control border border-line-strong bg-raised px-3 py-2.5 text-sm text-ink
+               placeholder:text-ink-subtle
+               focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand;
+    }
+
+    .select {
+        @apply pr-9;
+    }
+
+    .textarea {
+        @apply min-h-[4.5rem];
+    }
+
+    .input-sm {
+        @apply px-2.5 py-1.5 text-xs;
+    }
+
+    .checkbox {
+        @apply rounded border-line-strong text-brand focus:ring-brand;
+    }
+
+    .file-input {
+        @apply block w-full cursor-pointer rounded-control border border-line-strong bg-raised px-3 py-2 text-sm text-ink-muted
+               file:mr-3 file:cursor-pointer file:rounded-control file:border-0 file:bg-brand file:px-3 file:py-1.5
+               file:text-xs file:font-semibold file:text-white hover:file:bg-brand-hover;
+    }
+
+    .field-error {
+        @apply mt-1.5 text-sm text-danger-text;
+    }
+
+    .hint {
+        @apply mt-1.5 text-xs text-ink-subtle;
+    }
+
+    /* Chip selector (radio/segmented) */
+    .chip {
+        @apply inline-block cursor-pointer rounded-control border border-line px-4 py-2 text-sm font-medium text-ink-muted
+               transition hover:border-line-strong hover:text-ink
+               peer-checked:border-brand peer-checked:bg-brand-soft peer-checked:text-brand-text;
+    }
+
+    /* Baris yang bisa dicentang (dipakai baris peserta split) */
+    .row-toggle {
+        @apply flex flex-wrap items-center gap-2 rounded-control border border-line px-3 py-2.5 transition;
+    }
+
+    /* ---------------------------------------------------------
+       Navigasi
+       --------------------------------------------------------- */
+    .nav-link {
+        @apply rounded-control px-3 py-1.5 text-sm font-medium text-ink-muted transition hover:bg-sunken hover:text-ink;
+    }
+
+    .nav-link-active {
+        @apply bg-brand-soft text-brand-text hover:bg-brand-soft hover:text-brand-text;
+    }
+
+    .back-link {
+        @apply text-sm font-semibold text-brand-text hover:underline;
+    }
+
+    /* ---------------------------------------------------------
+       Tipografi
+       --------------------------------------------------------- */
+    .page-title {
+        @apply text-2xl font-extrabold tracking-tight text-ink md:text-3xl;
+    }
+
+    .section-title {
+        @apply font-bold text-ink;
+    }
+
+    .muted {
+        @apply text-sm text-ink-muted;
+    }
+
+    /* ---------------------------------------------------------
+       Badge & status
+       --------------------------------------------------------- */
+    .badge {
+        @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold;
+    }
+
+    .badge-neutral {
+        @apply bg-sunken text-ink-muted;
+    }
+    .badge-brand {
+        @apply bg-brand-soft text-brand-text;
+    }
+    .badge-success {
+        @apply bg-success-soft text-success-text;
+    }
+    .badge-warning {
+        @apply bg-warning-soft text-warning-text;
+    }
+    .badge-danger {
+        @apply bg-danger-soft text-danger-text;
+    }
+    .badge-info {
+        @apply bg-info-soft text-info-text;
+    }
+
+    /* ---------------------------------------------------------
+       Statistik
+       --------------------------------------------------------- */
+    .stat {
+        @apply rounded-card border p-4;
+    }
+
+    .stat-label {
+        @apply text-xs font-semibold uppercase tracking-wide;
+    }
+
+    .stat-value {
+        @apply mt-1 text-2xl font-extrabold tabular-nums;
+    }
+
+    .stat-neutral {
+        @apply border-line bg-raised;
+    }
+    .stat-neutral .stat-label {
+        @apply text-ink-subtle;
+    }
+    .stat-neutral .stat-value {
+        @apply text-ink;
+    }
+    .stat-danger {
+        @apply border-danger/30 bg-danger-soft;
+    }
+    .stat-danger .stat-label,
+    .stat-danger .stat-value {
+        @apply text-danger-text;
+    }
+    .stat-success {
+        @apply border-success/30 bg-success-soft;
+    }
+    .stat-success .stat-label,
+    .stat-success .stat-value {
+        @apply text-success-text;
+    }
+    .stat-warning {
+        @apply border-warning/30 bg-warning-soft;
+    }
+    .stat-warning .stat-label,
+    .stat-warning .stat-value {
+        @apply text-warning-text;
+    }
+    .stat-brand {
+        @apply border-brand/30 bg-brand-soft;
+    }
+    .stat-brand .stat-label,
+    .stat-brand .stat-value {
+        @apply text-brand-text;
+    }
+
+    /* ---------------------------------------------------------
+       Alert
+       --------------------------------------------------------- */
+    .alert {
+        @apply mb-5 rounded-card border px-4 py-3 text-sm font-medium;
+    }
+
+    .alert-success {
+        @apply border-success/30 bg-success-soft text-success-text;
+    }
+    .alert-danger {
+        @apply border-danger/30 bg-danger-soft text-danger-text;
+    }
+    .alert-warning {
+        @apply border-warning/30 bg-warning-soft text-warning-text;
+    }
+    .alert-info {
+        @apply border-info/30 bg-info-soft text-info-text;
+    }
+
+    /* ---------------------------------------------------------
+       Daftar & tabel
+       --------------------------------------------------------- */
+    .divide-list > * + * {
+        @apply border-t border-line;
+    }
+
+    .empty {
+        @apply rounded-control bg-sunken px-3 py-4 text-sm text-ink-subtle;
+    }
+
+    .table-wrap {
+        @apply overflow-x-auto rounded-card border border-line bg-raised;
+    }
+
+    .table {
+        @apply w-full min-w-full text-left text-sm;
+    }
+
+    .table thead th {
+        @apply whitespace-nowrap border-b border-line bg-sunken px-4 py-3 text-xs font-semibold uppercase tracking-wide text-ink-muted;
+    }
+
+    .table tbody td {
+        @apply border-b border-line px-4 py-3 align-middle;
+    }
+
+    .table tbody tr:last-child td {
+        @apply border-b-0;
+    }
+
+    .table tbody tr {
+        @apply transition hover:bg-sunken/60;
+    }
+
+    /* Angka uang selalu rata kiri per kolom, tabular biar kolom(".",) nggak goyang */
+    .money {
+        @apply tabular-nums;
+    }
+}
+
 [x-cloak] {
     display: none !important;
 }
