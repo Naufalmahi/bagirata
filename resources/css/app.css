@@ -179,7 +179,8 @@
         @apply min-h-[4.5rem];
     }
 
-    .input-sm {
+    .input-sm,
+    .select-sm {
         @apply px-2.5 py-1.5 text-xs;
     }
 

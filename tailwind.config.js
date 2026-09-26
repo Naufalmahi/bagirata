@@ -36,7 +36,7 @@ export default {
         // permukaan
         'card', 'card-hover', 'card-sunken', 'brand-mark', 'avatar',
         // form
-        'label', 'input', 'input-sm', 'select', 'textarea', 'checkbox',
+        'label', 'input', 'input-sm', 'select', 'select-sm', 'textarea', 'checkbox',
         'file-input', 'field-error', 'hint', 'chip', 'row-toggle',
         // navigasi
         'nav-link', 'nav-link-active', 'back-link',
