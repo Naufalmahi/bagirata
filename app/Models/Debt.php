@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\DebtStatus;
+use App\Exceptions\BusinessException;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -122,10 +123,22 @@ class Debt extends Model
     }
 
     /**
-     * Mark debt lunas. Only called from DebtPaymentService (bukan self-confirm bebas).
+     * Tandai utang lunas. HANYA dipanggil dari DebtPaymentService setelah
+     * pembayaran dikonfirmasi, jadi invariant paid_amount >= amount harus
+     * tetap dijaga di sini juga supaya tidak bisa dilanggar dari jalur lain.
      */
     public function markSettled(?User $by = null): void
     {
+        if ($this->isSettled()) {
+            return;
+        }
+
+        if ($this->paid_amount < $this->amount) {
+            throw new BusinessException(
+                'Utang belum bisa dilunasi: pembayarannya belum dikonfirmasi penuh.'
+            );
+        }
+
         $this->status = DebtStatus::SETTLED->value;
         $this->settled_at = now();
         $this->settled_by_user_id = $by?->id;

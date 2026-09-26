@@ -173,43 +173,6 @@ class SessionTest extends TestCase
     }
 
 
-    public function test_settle_debt_oleh_debtor_saja(): void
-    {
-        $a = User::factory()->create();
-        $b = User::factory()->create();
-        $c = User::factory()->create();
-
-        $session = $this->createSession(['a' => $a, 'b' => $b, 'c' => $c]);
-
-        $this->apiAs($a);
-        $this->postJson("/api/v1/sessions/{$session->id}/expenses", [
-            'name' => 'Makan rame',
-            'amount' => 150_000,
-            'paid_by_user_id' => $a->id,
-            'category' => 'makan',
-            'discount_type' => 'fixed',
-            'discount_value' => 0,
-            'service_rate' => 0,
-            'tax_rate' => 0,
-            'split_type' => 'equal',
-            'participant_ids' => [$a->id, $b->id, $c->id],
-        ]);
-
-        $debtToB = $session->debts()->where('from_user_id', $b->id)->where('status', 'pending')->firstOrFail();
-
-        // Orang lain (c) nggak boleh settle utang b
-        $this->apiAs($c);
-        $this->postJson("/api/v1/sessions/{$session->id}/debts/{$debtToB->id}/settle")
-            ->assertForbidden();
-
-        // Si b sendiri boleh
-        $this->apiAs($b);
-        $settle = $this->postJson("/api/v1/sessions/{$session->id}/debts/{$debtToB->id}/settle");
-        $settle->assertOk()->assertJsonPath('data.status', 'settled');
-
-        $this->assertDatabaseHas('debts', ['id' => $debtToB->id, 'status' => 'settled', 'settled_by_user_id' => $b->id]);
-    }
-
     public function test_semua_debt_settled_status_beres(): void
     {
         $a = User::factory()->create();
@@ -233,8 +196,21 @@ class SessionTest extends TestCase
 
         $debt = $session->debts()->where('status', 'pending')->firstOrFail();
 
+        // Utang cuma bisa lunas lewat laporan + konfirmasi, bukan self-settle.
         $this->apiAs($b);
-        $this->postJson("/api/v1/sessions/{$session->id}/debts/{$debt->id}/settle");
+        $this->postJson("/api/v1/sessions/{$session->id}/debts/{$debt->id}/payments", [
+            'amount' => $debt->amount,
+            'method' => 'cash',
+        ])->assertCreated();
+
+        $payment = $debt->payments()->firstOrFail();
+
+        $this->apiAs($a);
+        $this->postJson("/api/v1/sessions/{$session->id}/debts/{$debt->id}/payments/{$payment->id}/confirm", [
+            'decision' => 'confirmed',
+        ])->assertOk();
+
+        $this->assertDatabaseHas('debts', ['id' => $debt->id, 'status' => 'settled']);
 
         $this->getJson("/api/v1/sessions/{$session->id}")
             ->assertJsonPath('data.status', 'settled');

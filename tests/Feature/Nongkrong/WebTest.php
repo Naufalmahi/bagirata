@@ -243,36 +243,4 @@ class WebTest extends TestCase
 
         $this->assertAuthenticated();
     }
-
-    public function test_settle_debt_lewat_web(): void
-    {
-        $a = User::factory()->create();
-        $b = User::factory()->create();
-
-        $session = SessionService::create($a, [
-            'name' => 'Hitung',
-            'date' => now()->format('Y-m-d'),
-            'member_ids' => [$b->id],
-        ]);
-
-        $this->actingAs($a)->post(route('expenses.store', $session), [
-            'name' => 'Nasi rame',
-            'amount' => 40_000,
-            'paid_by_user_id' => $a->id,
-            'category' => 'makan',
-            'discount_type' => 'fixed',
-            'discount_value' => 0,
-            'service_rate' => 0,
-            'tax_rate' => 0,
-            'split_type' => 'equal',
-            'participant_ids' => [$a->id, $b->id],
-        ]);
-
-        $debt = $session->debts()->where('status', 'pending')->firstOrFail();
-
-        $this->actingAs($b)->post(route('debts.settle', [$session, $debt]))
-            ->assertRedirect();
-
-        $this->assertDatabaseHas('debts', ['id' => $debt->id, 'status' => 'settled']);
-    }
 }

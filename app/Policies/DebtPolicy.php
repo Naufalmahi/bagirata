@@ -12,10 +12,13 @@ class DebtPolicy
         return $debt->session->isMember($user);
     }
 
-    public function settle(User $user, Debt $debt): bool
+    public function reportPayment(User $user, Debt $debt): bool
     {
-        return $debt->from_user_id === $user->id
-            && $debt->session->isMember($user)
-            && $debt->status === \App\Enums\DebtStatus::PENDING->value;
+        return $debt->canDebtorReport($user);
+    }
+
+    public function reviewPayment(User $user, Debt $debt): bool
+    {
+        return $debt->canCreditorReview($user);
     }
 }

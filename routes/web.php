@@ -96,5 +96,4 @@ Route::middleware('auth')->group(function () {
     Route::post('/nongkrong/{session}/debts/{debt}/payments', [DebtController::class, 'reportPayment'])->name('debts.payments.store');
     Route::post('/nongkrong/{session}/debts/{debt}/payments/{payment}/confirm', [DebtController::class, 'confirmPayment'])->name('debts.payments.confirm');
     Route::post('/nongkrong/{session}/debts/{debt}/payments/{payment}/reject', [DebtController::class, 'rejectPayment'])->name('debts.payments.reject');
-    Route::post('/nongkrong/{session}/debts/{debt}/settle', [DebtController::class, 'settle'])->name('debts.settle');
 });

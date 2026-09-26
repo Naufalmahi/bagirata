@@ -131,17 +131,4 @@ class DebtController extends Controller
 
         return back()->with('success', 'Pembayaran ditolak. Yuk dipastiin lagi, nggak papa kok.');
     }
-
-    public function settle(Request $request, NongkrongSession $session, Debt $debt)
-    {
-        $this->authorize('settle', $debt);
-
-        if ($debt->nongkrong_session_id !== $session->id) {
-            abort(404);
-        }
-
-        $debt->markSettled($request->user());
-
-        return back()->with('success', 'Utang ditandain lunas. Lega banget.');
-    }
 }
