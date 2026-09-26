@@ -87,6 +87,8 @@ class DebtController extends Controller
             abort(404);
         }
 
+        $this->authorize('reportPayment', $debt);
+
         $proofPath = $request->hasFile('proof_photo')
             ? $request->file('proof_photo')->store('payment-proofs', 'public')
             : null;
@@ -101,6 +103,8 @@ class DebtController extends Controller
         if ($debt->nongkrong_session_id !== $session->id || $payment->debt_id !== $debt->id) {
             abort(404);
         }
+
+        $this->authorize('reviewPayment', $debt);
 
         $debt = DebtPaymentService::confirm(
             $request->user(),
@@ -121,6 +125,8 @@ class DebtController extends Controller
         if ($debt->nongkrong_session_id !== $session->id || $payment->debt_id !== $debt->id) {
             abort(404);
         }
+
+        $this->authorize('reviewPayment', $debt);
 
         DebtPaymentService::reject(
             $request->user(),
