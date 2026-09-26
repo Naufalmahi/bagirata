@@ -81,6 +81,57 @@ class DebtController extends Controller
         return view('debts.show', compact('session', 'debt'));
     }
 
+    public function reportPayment(StoreDebtPaymentRequest $request, NongkrongSession $session, Debt $debt)
+    {
+        if ($debt->nongkrong_session_id !== $session->id) {
+            abort(404);
+        }
+
+        $proofPath = $request->hasFile('proof_photo')
+            ? $request->file('proof_photo')->store('payment-proofs', 'public')
+            : null;
+
+        DebtPaymentService::report($request->user(), $debt, $request->validated(), $proofPath);
+
+        return back()->with('success', 'Lapor bayar kesimpen. Tinggal nunggu kreditur konfirmasi.');
+    }
+
+    public function confirmPayment(ReviewDebtPaymentRequest $request, NongkrongSession $session, Debt $debt, DebtPayment $payment)
+    {
+        if ($debt->nongkrong_session_id !== $session->id || $payment->debt_id !== $debt->id) {
+            abort(404);
+        }
+
+        $debt = DebtPaymentService::confirm(
+            $request->user(),
+            $debt,
+            $payment,
+            $request->input('review_note')
+        );
+
+        $message = $debt->isSettled()
+            ? 'Pembayaran dikonfirmasi. Semua aman, utang udah rata!'
+            : 'Pembayaran dikonfirmasi, sisa utang masih lanjut dikit lagi.';
+
+        return back()->with('success', $message);
+    }
+
+    public function rejectPayment(ReviewDebtPaymentRequest $request, NongkrongSession $session, Debt $debt, DebtPayment $payment)
+    {
+        if ($debt->nongkrong_session_id !== $session->id || $payment->debt_id !== $debt->id) {
+            abort(404);
+        }
+
+        DebtPaymentService::reject(
+            $request->user(),
+            $debt,
+            $payment,
+            $request->input('review_note', '')
+        );
+
+        return back()->with('success', 'Pembayaran ditolak. Yuk dipastiin lagi, nggak papa kok.');
+    }
+
     public function settle(Request $request, NongkrongSession $session, Debt $debt)
     {
         $this->authorize('settle', $debt);
