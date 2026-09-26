@@ -21,6 +21,13 @@ class WalletEntry extends Model
         'receipt_photo',
         'status',
         'approved_by',
+        'reviewed_by',
+        'reviewed_at',
+        'review_note',
+    ];
+
+    protected $casts = [
+        'reviewed_at' => 'datetime',
     ];
 
     public function wallet()
@@ -38,6 +45,11 @@ class WalletEntry extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    public function reviewer()
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
     public function isApproved(): bool
     {
         return $this->status === 'approved';
@@ -46,5 +58,10 @@ class WalletEntry extends Model
     public function isPending(): bool
     {
         return $this->status === 'pending';
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->status === 'rejected';
     }
 }

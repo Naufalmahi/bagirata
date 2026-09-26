@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\BusinessException;
 use App\Models\ActivityLog;
 use App\Models\Group;
 use App\Models\GroupWallet;
@@ -15,18 +16,22 @@ class TreasuryService
     {
         return $group->wallet ?? GroupWallet::create([
             'group_id' => $group->id,
-            'name' => 'Kas ' . $group->name,
+            'name' => 'Kas '.$group->name,
             'balance' => 0,
         ]);
     }
 
+    /**
+     * Catat entry baru. Status TIDAK bisa ditentukan pemanggil: owner otomatis
+     * approved, selain itu pending. Kalau status sampai diteruskan dari input,
+     * anggota bisa self-approve dan langsung crediting saldo sendiri.
+     */
     public static function recordEntry(GroupWallet $wallet, User $user, array $data, ?string $receiptPath = null): WalletEntry
     {
         return DB::transaction(function () use ($wallet, $user, $data, $receiptPath) {
             $isOwner = $wallet->group->user_id === $user->id;
-            
-            // Auto-approve if created by owner or under a certain threshold, else pending
-            $status = $isOwner ? 'approved' : ($data['status'] ?? 'pending');
+
+            $status = $isOwner ? 'approved' : 'pending';
             $approvedBy = $status === 'approved' ? $user->id : null;
 
             $entry = $wallet->entries()->create([
@@ -38,48 +43,51 @@ class TreasuryService
                 'receipt_photo' => $receiptPath,
                 'status' => $status,
                 'approved_by' => $approvedBy,
+                'reviewed_by' => $approvedBy,
+                'reviewed_at' => $isOwner ? now() : null,
             ]);
 
             if ($status === 'approved') {
-                self::applyToBalance($wallet, $entry->type, $entry->amount);
+                self::applyToBalance($wallet, $entry->type, $entry->amount, 1);
             }
 
-            ActivityLog::create([
-                'user_id' => $user->id,
-                'event' => 'wallet_entry_created',
-                'description' => "Mencatat kas {$entry->type}: Rp " . number_format($entry->amount, 0, ',', '.'),
-                'auditable_type' => WalletEntry::class,
-                'auditable_id' => $entry->id,
-                'properties' => $entry->toArray(),
-            ]);
+            self::audit($user, 'wallet_entry_created', $entry, $entry->toArray(), "Mencatat kas {$entry->type}: ".self::rp($entry->amount));
 
             return $entry;
         });
     }
 
-    public static function approveEntry(WalletEntry $entry, User $approver): WalletEntry
+    public static function approveEntry(WalletEntry $entry, User $approver, ?string $note = null): WalletEntry
     {
-        return DB::transaction(function () use ($entry, $approver) {
-            if ($entry->status === 'approved') {
+        return DB::transaction(function () use ($entry, $approver, $note) {
+            if ($entry->isApproved()) {
+                // Sudah pernah di-credit. Idempoten, jangan gerakkan saldo lagi.
                 return $entry;
             }
 
-            $wallet = $entry->wallet()->lockForUpdate()->first();
+            if ($entry->isRejected()) {
+                throw new BusinessException('Transaksi yang sudah ditolak nggak bisa disetujui. Catat entry baru yaa.');
+            }
+
+            $wallet = $entry->wallet()->lockForUpdate()->firstOrFail();
 
             $entry->update([
                 'status' => 'approved',
                 'approved_by' => $approver->id,
+                'reviewed_by' => $approver->id,
+                'reviewed_at' => now(),
+                'review_note' => $note,
             ]);
 
-            self::applyToBalance($wallet, $entry->type, $entry->amount);
+            self::applyToBalance($wallet, $entry->type, $entry->amount, 1);
 
-            ActivityLog::create([
-                'user_id' => $approver->id,
-                'event' => 'wallet_entry_approved',
-                'description' => "Menyetujui transaksi kas {$entry->type} senilai Rp " . number_format($entry->amount, 0, ',', '.'),
-                'auditable_type' => WalletEntry::class,
-                'auditable_id' => $entry->id,
-            ]);
+            self::audit(
+                $approver,
+                'wallet_entry_approved',
+                $entry,
+                ['entry_id' => $entry->id, 'amount' => $entry->amount],
+                "Menyetujui transaksi kas {$entry->type} senilai ".self::rp($entry->amount)
+            );
 
             return $entry;
         });
@@ -88,29 +96,65 @@ class TreasuryService
     public static function rejectEntry(WalletEntry $entry, User $reviewer, ?string $note = null): WalletEntry
     {
         return DB::transaction(function () use ($entry, $reviewer, $note) {
+            if ($entry->isRejected()) {
+                return $entry;
+            }
+
+            $wallet = $entry->wallet()->lockForUpdate()->firstOrFail();
+
+            // Kunci ledger: kalau entry ini sempat approved, saldonya sudah
+            // bergerak. Menolaknya harus membalik, kalau tidak saldo ngaku
+            // ada uang masuk padahal transaksinya dibatalkan.
+            $wasApproved = $entry->isApproved();
+
             $entry->update([
                 'status' => 'rejected',
-                'approved_by' => $reviewer->id,
+                'approved_by' => null,
+                'reviewed_by' => $reviewer->id,
+                'reviewed_at' => now(),
+                'review_note' => $note,
             ]);
 
-            ActivityLog::create([
-                'user_id' => $reviewer->id,
-                'event' => 'wallet_entry_rejected',
-                'description' => "Menolak transaksi kas: " . ($note ?? 'Tanpa alasan'),
-                'auditable_type' => WalletEntry::class,
-                'auditable_id' => $entry->id,
-            ]);
+            if ($wasApproved) {
+                self::applyToBalance($wallet, $entry->type, $entry->amount, -1);
+            }
+
+            self::audit(
+                $reviewer,
+                'wallet_entry_rejected',
+                $entry,
+                ['entry_id' => $entry->id, 'amount' => $entry->amount, 'reversed_balance' => $wasApproved],
+                'Menolak transaksi kas: '.($note ?? 'Tanpa alasan')
+            );
 
             return $entry;
         });
     }
 
-    private static function applyToBalance(GroupWallet $wallet, string $type, int $amount): void
+    /**
+     * $sign = 1 untuk credit, -1 untuk reversal saat penolakan.
+     */
+    private static function applyToBalance(GroupWallet $wallet, string $type, int $amount, int $sign): void
     {
-        if ($type === 'in') {
-            $wallet->increment('balance', $amount);
-        } else {
-            $wallet->decrement('balance', $amount);
-        }
+        $delta = $type === 'in' ? $amount * $sign : -($amount * $sign);
+
+        $wallet->update(['balance' => $wallet->balance + $delta]);
+    }
+
+    private static function audit(User $actor, string $event, WalletEntry $entry, array $properties, string $description): void
+    {
+        ActivityLog::create([
+            'user_id' => $actor->id,
+            'event' => $event,
+            'description' => $description,
+            'auditable_type' => WalletEntry::class,
+            'auditable_id' => $entry->id,
+            'properties' => $properties,
+        ]);
+    }
+
+    private static function rp(int $amount): string
+    {
+        return 'Rp '.number_format($amount, 0, ',', '.');
     }
 }
