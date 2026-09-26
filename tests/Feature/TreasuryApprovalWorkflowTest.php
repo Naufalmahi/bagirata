@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Exceptions\BusinessException;
 use App\Models\GroupMember;
 use App\Models\User;
+use App\Models\WalletEntry;
 use App\Services\GroupService;
 use App\Services\TreasuryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -155,6 +156,51 @@ class TreasuryApprovalWorkflowTest extends TestCase
         TreasuryService::rejectEntry($entries[0]->fresh(), $f['owner']);
         TreasuryService::rejectEntry($entries[2]->fresh(), $f['owner']);
         $this->assertSame(0, $f['wallet']->fresh()->balance);
+    }
+
+    /**
+     * Simulasi dua request approve yang barengan.
+     *
+     * Request kedua masih pegang model basahi berstatus 'pending' dari luar
+     * transaksi, padahal baris di DB sudah 'approved'. Kalau service cuma
+     * percaya model yang masuk, guard terlewati dan saldo nambah dua kali.
+     */
+    public function test_approve_dengan_model_basah_tidak_menambah_saldo_ganda(): void
+    {
+        $f = $this->setupTreasury();
+
+        TreasuryService::approveEntry($f['entry'], $f['owner']);
+        $this->assertSame(50_000, $f['wallet']->fresh()->balance);
+
+        $basah = WalletEntry::findOrFail($f['entry']->id);
+        $basah->status = 'pending';
+
+        TreasuryService::approveEntry($basah, $f['owner']);
+
+        $this->assertSame(50_000, $f['wallet']->fresh()->balance, 'Saldo nambah dua kali.');
+        $this->assertSame(1, WalletEntry::where('status', 'approved')->count());
+    }
+
+    /**
+     * Sama untuk reject: request kedua masih pegang status 'approved' basahi
+     * padahal DB sudah 'rejected', jadi saldo jangan dibalik dua kali.
+     */
+    public function test_reject_dengan_model_basah_tidak_membalik_saldo_ganda(): void
+    {
+        $f = $this->setupTreasury();
+
+        TreasuryService::approveEntry($f['entry'], $f['owner']);
+        $this->assertSame(50_000, $f['wallet']->fresh()->balance);
+
+        TreasuryService::rejectEntry($f['entry']->fresh(), $f['owner']);
+        $this->assertSame(0, $f['wallet']->fresh()->balance);
+
+        $basah = WalletEntry::findOrFail($f['entry']->id);
+        $basah->status = 'approved';
+
+        TreasuryService::rejectEntry($basah, $f['owner']);
+
+        $this->assertSame(0, $f['wallet']->fresh()->balance, 'Saldo dibalik dua kali.');
     }
 
     /**

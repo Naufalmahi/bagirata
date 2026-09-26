@@ -60,75 +60,110 @@ class TreasuryService
     public static function approveEntry(WalletEntry $entry, User $approver, ?string $note = null): WalletEntry
     {
         return DB::transaction(function () use ($entry, $approver, $note) {
-            if ($entry->isApproved()) {
+            $fresh = self::lockEntry($entry);
+
+            if ($fresh->isApproved()) {
                 // Sudah pernah di-credit. Idempoten, jangan gerakkan saldo lagi.
-                return $entry;
+                return $fresh;
             }
 
-            if ($entry->isRejected()) {
+            if ($fresh->isRejected()) {
                 throw new BusinessException('Transaksi yang sudah ditolak nggak bisa disetujui. Catat entry baru yaa.');
             }
 
-            $wallet = $entry->wallet()->lockForUpdate()->firstOrFail();
+            $wallet = GroupWallet::whereKey($fresh->group_wallet_id)->lockForUpdate()->firstOrFail();
 
-            $entry->update([
-                'status' => 'approved',
-                'approved_by' => $approver->id,
-                'reviewed_by' => $approver->id,
-                'reviewed_at' => now(),
-                'review_note' => $note,
-            ]);
+            // Pengaman kedua: hanya baris yang masih pending boleh jadi approved.
+            $diupdate = WalletEntry::whereKey($fresh->id)
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'approved',
+                    'approved_by' => $approver->id,
+                    'reviewed_by' => $approver->id,
+                    'reviewed_at' => now(),
+                    'review_note' => $note,
+                ]);
 
-            self::applyToBalance($wallet, $entry->type, $entry->amount, 1);
+            if ($diupdate === 0) {
+                // Sudah diproses request lain. Jangan sentuh saldo.
+                return WalletEntry::findOrFail($fresh->id);
+            }
+
+            self::applyToBalance($wallet, $fresh->type, $fresh->amount, 1);
+
+            $fresh = WalletEntry::findOrFail($fresh->id);
 
             self::audit(
                 $approver,
                 'wallet_entry_approved',
-                $entry,
-                ['entry_id' => $entry->id, 'amount' => $entry->amount],
-                "Menyetujui transaksi kas {$entry->type} senilai ".self::rp($entry->amount)
+                $fresh,
+                ['entry_id' => $fresh->id, 'amount' => $fresh->amount],
+                "Menyetujui transaksi kas {$fresh->type} senilai ".self::rp($fresh->amount)
             );
 
-            return $entry;
+            return $fresh;
         });
     }
 
     public static function rejectEntry(WalletEntry $entry, User $reviewer, ?string $note = null): WalletEntry
     {
         return DB::transaction(function () use ($entry, $reviewer, $note) {
-            if ($entry->isRejected()) {
-                return $entry;
+            $fresh = self::lockEntry($entry);
+
+            if ($fresh->isRejected()) {
+                return $fresh;
             }
 
-            $wallet = $entry->wallet()->lockForUpdate()->firstOrFail();
+            $wallet = GroupWallet::whereKey($fresh->group_wallet_id)->lockForUpdate()->firstOrFail();
 
             // Kunci ledger: kalau entry ini sempat approved, saldonya sudah
             // bergerak. Menolaknya harus membalik, kalau tidak saldo ngaku
             // ada uang masuk padahal transaksinya dibatalkan.
-            $wasApproved = $entry->isApproved();
+            $wasApproved = $fresh->isApproved();
 
-            $entry->update([
-                'status' => 'rejected',
-                'approved_by' => null,
-                'reviewed_by' => $reviewer->id,
-                'reviewed_at' => now(),
-                'review_note' => $note,
-            ]);
+            $diupdate = WalletEntry::whereKey($fresh->id)
+                ->whereIn('status', ['pending', 'approved'])
+                ->update([
+                    'status' => 'rejected',
+                    'approved_by' => null,
+                    'reviewed_by' => $reviewer->id,
+                    'reviewed_at' => now(),
+                    'review_note' => $note,
+                ]);
+
+            if ($diupdate === 0) {
+                return WalletEntry::findOrFail($fresh->id);
+            }
 
             if ($wasApproved) {
-                self::applyToBalance($wallet, $entry->type, $entry->amount, -1);
+                self::applyToBalance($wallet, $fresh->type, $fresh->amount, -1);
             }
+
+            $fresh = WalletEntry::findOrFail($fresh->id);
 
             self::audit(
                 $reviewer,
                 'wallet_entry_rejected',
-                $entry,
-                ['entry_id' => $entry->id, 'amount' => $entry->amount, 'reversed_balance' => $wasApproved],
+                $fresh,
+                ['entry_id' => $fresh->id, 'amount' => $fresh->amount, 'reversed_balance' => $wasApproved],
                 'Menolak transaksi kas: '.($note ?? 'Tanpa alasan')
             );
 
-            return $entry;
+            return $fresh;
         });
+    }
+
+    /**
+     * Baris entry yang terkunci untuk update, jadi status yang dibaca di dalam
+     * transaksi dijamin data terkini. Urutan lock selalu entry dulu baru wallet,
+     * konsisten di approveEntry() dan rejectEntry() supaya nggak deadlock.
+     *
+     * Di SQLite lockForUpdate() cuma no-op, makanya update bersyarat tetap
+     * dipakai sebagai pengaman kedua.
+     */
+    private static function lockEntry(WalletEntry $entry): WalletEntry
+    {
+        return WalletEntry::whereKey($entry->id)->lockForUpdate()->firstOrFail();
     }
 
     /**
