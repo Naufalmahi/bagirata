@@ -154,5 +154,7 @@
     <footer class="mx-auto w-full max-w-5xl px-4 pb-10 pt-4 text-center text-xs text-ink-subtle">
         BagiRata · patungan gak ribet, yang penting nggak ada drama soal duit.
     </footer>
+
+    @stack('scripts')
 </body>
 </html>
