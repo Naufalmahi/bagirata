@@ -4,9 +4,9 @@
 
 @section('content')
     <div class="mx-auto max-w-xl">
-        <a href="{{ route('nongkrong.show', $session) }}" class="text-sm font-semibold text-indigo-600 hover:underline">← Balik ke {{ $session->name }}</a>
-        <h1 class="mt-1 text-2xl font-extrabold text-slate-900">Catat pengeluaran</h1>
-        <p class="mt-1 text-sm text-slate-500">Utang-piutang bakal langsung diitung ulang otomatis.</p>
+        <a href="{{ route('nongkrong.show', $session) }}" class="back-link">← Balik ke {{ $session->name }}</a>
+        <h1 class="page-title mt-1">Catat pengeluaran</h1>
+        <p class="muted mt-1">Utang-piutang bakal langsung diitung ulang otomatis.</p>
 
         @php
             $initial = [
@@ -28,7 +28,7 @@
             ];
         @endphp
 
-        <div class="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="card mt-6 p-6">
             @include('expenses._form', [
                 'action' => route('expenses.store', $session),
                 'method' => 'POST',

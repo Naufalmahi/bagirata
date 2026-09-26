@@ -51,7 +51,7 @@ export default {
         // alert
         'alert', 'alert-success', 'alert-danger', 'alert-warning', 'alert-info',
         // daftar & tabel
-        'divide-list', 'empty', 'table-wrap', 'table', 'money',
+        'divide-list', 'empty', 'empty-panel', 'list-row', 'table-wrap', 'table', 'money',
     ],
     theme: {
         // Sengaja `extend`, bukan `theme`: palette bawaan Tailwind (slate-*, rose-*,

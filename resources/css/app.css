@@ -353,6 +353,17 @@
         @apply rounded-control bg-sunken px-3 py-4 text-sm text-ink-subtle;
     }
 
+    /* Empty state besar dengan border putus-putus, buat section yang belum ada isinya */
+    .empty-panel {
+        @apply rounded-card border border-dashed border-line-strong bg-raised p-8 text-center;
+    }
+
+    /* Baris daftar yang bisa diklik (nongkrong, group, anggota) */
+    .list-row {
+        @apply flex items-center justify-between gap-3 rounded-card border border-line bg-raised px-4 py-3
+               transition hover:border-brand/40 hover:shadow-card-hover;
+    }
+
     .table-wrap {
         @apply overflow-x-auto rounded-card border border-line bg-raised;
     }

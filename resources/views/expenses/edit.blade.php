@@ -4,9 +4,9 @@
 
 @section('content')
     <div class="mx-auto max-w-xl">
-        <a href="{{ route('nongkrong.show', $session) }}" class="text-sm font-semibold text-indigo-600 hover:underline">← Balik ke {{ $session->name }}</a>
-        <h1 class="mt-1 text-2xl font-extrabold text-slate-900">Edit pengeluaran</h1>
-        <p class="mt-1 text-sm text-slate-500">Bagian dan utang diitung ulang sesuai perubahan lu.</p>
+        <a href="{{ route('nongkrong.show', $session) }}" class="back-link">← Balik ke {{ $session->name }}</a>
+        <h1 class="page-title mt-1">Edit pengeluaran</h1>
+        <p class="muted mt-1">Bagian dan utang diitung ulang sesuai perubahan lu.</p>
 
         @php
             $participantIds = $expense->splits->pluck('user_id')->all();
@@ -32,7 +32,7 @@
             ];
         @endphp
 
-        <div class="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="card mt-6 p-6">
             @include('expenses._form', [
                 'action' => route('expenses.update', [$session, $expense]),
                 'method' => 'PATCH',
