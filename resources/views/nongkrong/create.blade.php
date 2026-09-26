@@ -98,6 +98,7 @@
                             </template>
                         </ul>
                         <p x-show="loading" x-cloak class="hint">Mencari...</p>
+                        <p x-show="error" x-cloak class="field-error" x-text="error"></p>
 
                         <div class="mt-3 flex flex-wrap gap-2">
                             <template x-for="s in selected" :key="s.id">

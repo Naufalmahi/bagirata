@@ -56,25 +56,34 @@ window.friendPicker = (apiBase, meId) => ({
     results: [],
     selected: [],
     loading: false,
+    error: '',
     async search() {
         const term = this.q.trim();
         if (term.length < 2) {
             this.results = [];
+            this.error = '';
             return;
         }
 
         this.loading = true;
+        this.error = '';
         try {
             const res = await fetch(apiBase + '/users?q=' + encodeURIComponent(term), {
                 headers: { Accept: 'application/json' },
             });
             const json = await res.json();
+            // Tanpa cek ini, 401/422 ikut dibaca sebagai hasil sehingga
+            // pengguna mengira "temennya nggak ada" padahal request-nya gagal.
+            if (!res.ok) {
+                throw new Error(json.message || 'Gagal cari teman. Coba lagi yaa.');
+            }
             const data = json.data || [];
             this.results = data.filter(
                 (u) => u.id !== meId && !this.selected.some((s) => s.id === u.id)
             );
         } catch (error) {
             this.results = [];
+            this.error = error.message;
         } finally {
             this.loading = false;
         }
@@ -83,6 +92,7 @@ window.friendPicker = (apiBase, meId) => ({
         this.selected.push({ id: user.id, name: user.name });
         this.q = '';
         this.results = [];
+        this.error = '';
     },
     remove(id) {
         this.selected = this.selected.filter((s) => s.id !== id);
