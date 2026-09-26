@@ -7,11 +7,13 @@ use App\Models\Debt;
 use App\Models\Expense;
 use App\Models\Group;
 use App\Models\NongkrongSession;
+use App\Models\WalletEntry;
 use App\Policies\ChannelPolicy;
 use App\Policies\DebtPolicy;
 use App\Policies\ExpensePolicy;
 use App\Policies\GroupPolicy;
 use App\Policies\NongkrongSessionPolicy;
+use App\Policies\WalletEntryPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -27,6 +29,7 @@ class AuthServiceProvider extends ServiceProvider
         NongkrongSession::class => NongkrongSessionPolicy::class,
         Expense::class => ExpensePolicy::class,
         Debt::class => DebtPolicy::class,
+        WalletEntry::class => WalletEntryPolicy::class,
     ];
 
     /**

@@ -58,9 +58,13 @@ class TreasuryController extends Controller
 
     public function approve(Request $request, Group $group, WalletEntry $entry)
     {
+        $this->assertEntryBelongsToGroup($group, $entry);
+
         if ($group->user_id !== $request->user()->id) {
             abort(403, 'Hanya admin yang boleh menyetujui transaksi.');
         }
+
+        $this->authorize('approveEntry', $entry);
 
         TreasuryService::approveEntry($entry, $request->user());
 
@@ -69,12 +73,28 @@ class TreasuryController extends Controller
 
     public function reject(Request $request, Group $group, WalletEntry $entry)
     {
+        $this->assertEntryBelongsToGroup($group, $entry);
+
         if ($group->user_id !== $request->user()->id) {
             abort(403, 'Hanya admin yang boleh menolak transaksi.');
         }
 
+        $this->authorize('rejectEntry', $entry);
+
         TreasuryService::rejectEntry($entry, $request->user(), $request->input('note'));
 
         return back()->with('success', 'Transaksi kas ditolak.');
+    }
+
+    /**
+     * {entry} di-resolve global, jadi harus dipastikan wallet-nya milik group
+     * yang ada di URL. 404 (bukan 403) supaya keberadaan entry group lain
+     * nggak bocor.
+     */
+    private function assertEntryBelongsToGroup(Group $group, WalletEntry $entry): void
+    {
+        if ($entry->wallet?->group_id !== $group->id) {
+            abort(404);
+        }
     }
 }
