@@ -3,6 +3,54 @@ import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
 
+/**
+ * Theme store: 'light' | 'dark' | 'system'.
+ *
+ * Preferensi disimpan di localStorage, tapi kelas `dark` di <html> sudah
+ * dipasang lebih dulu oleh inline script anti-flash di layouts/app.blade.php
+ * supaya nggak ada kedipan putih saat halaman dimuat. Store ini yang
+ * nuggets sinkronnya setelah itu.
+ */
+const THEME_KEY = 'bagirata-theme';
+
+Alpine.store('theme', {
+    pref: 'system',
+    dark: false,
+    media: null,
+
+    init() {
+        this.pref = localStorage.getItem(THEME_KEY) || 'system';
+        this.media = window.matchMedia('(prefers-color-scheme: dark)');
+        this.sync();
+
+        // Ikuti perubahan setting sistem selama pref masih 'system'.
+        const onChange = () => {
+            if (this.pref === 'system') this.sync();
+        };
+        if (this.media.addEventListener) {
+            this.media.addEventListener('change', onChange);
+        } else if (this.media.addListener) {
+            this.media.addListener(onChange);
+        }
+    },
+
+    sync() {
+        this.dark = this.pref === 'dark' || (this.pref === 'system' && this.media.matches);
+        document.documentElement.classList.toggle('dark', this.dark);
+        document.documentElement.style.colorScheme = this.dark ? 'dark' : 'light';
+    },
+
+    set(pref) {
+        this.pref = pref;
+        localStorage.setItem(THEME_KEY, pref);
+        this.sync();
+    },
+
+    toggle() {
+        this.set(this.dark ? 'light' : 'dark');
+    },
+});
+
 window.friendPicker = (apiBase, meId) => ({
     q: '',
     results: [],

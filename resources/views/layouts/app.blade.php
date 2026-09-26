@@ -6,65 +6,152 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'BagiRata') · Nongkrong Fun</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{--
+        Anti-flash: pasang kelas `dark` sebelum CSS pertama kali di-render.
+        Nggak boleh pakai Alpine di sini karena Alpine dimuat lewat @vite dan
+        sudah terlambat. Inline script harus tetap sinkron & tanpa dependensi.
+    --}}
+    <script>
+        (function () {
+            try {
+                // Kunci ini harus sama dengan THEME_KEY di resources/js/app.js.
+                var pref = localStorage.getItem('bagirata-theme') || 'system';
+                var dark = pref === 'dark' ||
+                    (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                document.documentElement.classList.toggle('dark', dark);
+                document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+            } catch (e) {
+                // localStorage diblokir (mode privat / iframe sandbox) — pakai default sistem.
+            }
+        })();
+    </script>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
-    @auth
-        <nav class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
-            <div class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-2 font-extrabold text-indigo-600">
-                    <span class="grid h-8 w-8 place-items-center rounded-xl bg-indigo-600 text-white">N</span>
-                    <span>BagiRata<span class="text-slate-400 font-semibold">/nongkrong</span></span>
-                </a>
+<body class="flex min-h-screen flex-col">
+    @php
+        $active = request()->route()?->getName() ?? '';
+        $navItems = [
+            ['route' => 'dashboard', 'label' => 'Dashboard', 'match' => 'dashboard'],
+            ['route' => 'groups.index', 'label' => 'Groups', 'match' => 'groups'],
+            ['route' => 'nongkrong.index', 'label' => 'Nongkrong', 'match' => 'nongkrong'],
+            ['route' => 'calculator.index', 'label' => 'Kalkulator', 'match' => 'calculator'],
+            ['route' => 'budgets.index', 'label' => 'Budgeting', 'match' => 'budgets'],
+            ['route' => 'debts.overview', 'label' => 'Utang-Piutang', 'match' => 'debts'],
+        ];
+    @endphp
 
-                <div class="flex items-center gap-1 text-sm font-medium">
-                    @php $active = request()->route()?->getName() ?? ''; @endphp
-                    <a href="{{ route('dashboard') }}"
-                        class="rounded-lg px-3 py-1.5 {{ str_starts_with($active, 'dashboard') ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Dashboard</a>
-                    <a href="{{ route('groups.index') }}"
-                        class="rounded-lg px-3 py-1.5 {{ str_starts_with($active, 'groups') ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Groups</a>
-                    <a href="{{ route('nongkrong.index') }}"
-                        class="rounded-lg px-3 py-1.5 {{ str_starts_with($active, 'nongkrong') ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Nongkrong</a>
-                    <a href="{{ route('calculator.index') }}"
-                        class="rounded-lg px-3 py-1.5 {{ str_starts_with($active, 'calculator') ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Kalkulator</a>
-                    <a href="{{ route('budgets.index') }}"
-                        class="rounded-lg px-3 py-1.5 {{ str_starts_with($active, 'budgets') ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Budgeting</a>
-                    <a href="{{ route('debts.overview') }}"
-                        class="rounded-lg px-3 py-1.5 {{ str_starts_with($active, 'debts') ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-100' }}">Utang-Piutang</a>
-                </div>
+    <header x-data="{ navOpen: false }" class="sticky top-0 z-30 border-b border-line bg-raised/85 backdrop-blur">
+        <div class="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
+            <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="flex items-center gap-2">
+                <span class="brand-mark">N</span>
+                <span class="text-base font-extrabold text-ink">
+                    BagiRata<span class="font-semibold text-ink-subtle">/nongkrong</span>
+                </span>
+            </a>
 
-                <div class="flex items-center gap-2">
-                    <a href="{{ route('groups.create') }}"
-                        class="hidden sm:inline-flex rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700">+ Group</a>
-                    <div class="hidden md:flex items-center gap-2 text-sm text-slate-700">
-                        <span class="grid h-8 w-8 place-items-center rounded-full bg-indigo-100 font-bold text-indigo-600">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-                        <span class="max-w-[10rem] truncate font-semibold">{{ auth()->user()->name }}</span>
+            @auth
+                {{-- Navigasi desktop --}}
+                <nav class="ml-4 hidden items-center gap-1 lg:flex" aria-label="Utama">
+                    @foreach ($navItems as $item)
+                        <a href="{{ route($item['route']) }}"
+                            @class([
+                                'nav-link',
+                                'nav-link-active' => str_starts_with($active, $item['match']),
+                            ])
+                            @if (str_starts_with($active, $item['match'])) aria-current="page" @endif>
+                            {{ $item['label'] }}
+                        </a>
+                    @endforeach
+                </nav>
+            @endauth
+
+            <div class="ml-auto flex items-center gap-2">
+                <button type="button" @click="$store.theme.toggle()"
+                    class="btn btn-ghost btn-icon"
+                    :aria-label="$store.theme.dark ? 'Ganti ke mode terang' : 'Ganti ke mode gelap'"
+                    :title="$store.theme.dark ? 'Mode terang' : 'Mode gelap'">
+                    <svg x-show="!$store.theme.dark" class="h-5 w-5" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                    </svg>
+                    <svg x-show="$store.theme.dark" x-cloak class="h-5 w-5" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                    </svg>
+                </button>
+
+                @auth
+                    <a href="{{ route('groups.create') }}" class="btn btn-primary btn-sm hidden sm:inline-flex">+ Group</a>
+
+                    <div class="hidden items-center gap-2 md:flex">
+                        <span class="avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                        <span class="max-w-[10rem] truncate text-sm font-semibold text-ink">{{ auth()->user()->name }}</span>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}">
+
+                    <form method="POST" action="{{ route('logout') }}" class="hidden lg:block">
                         @csrf
-                        <button class="rounded-lg px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-100">Keluar</button>
+                        <button class="btn btn-ghost btn-sm">Keluar</button>
                     </form>
-                </div>
-            </div>
-        </nav>
-    @endauth
 
-    <main class="mx-auto w-full max-w-5xl px-4 py-6 md:py-10">
-        @if (session('success'))
-            <div class="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
-                {{ session('success') }}
+                    {{-- Tombol menu untuk layar kecil --}}
+                    <button type="button" @click="navOpen = !navOpen" class="btn btn-ghost btn-icon lg:hidden"
+                        :aria-expanded="navOpen" aria-controls="menu-mobile" aria-label="Buka menu">
+                        <svg x-show="!navOpen" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                            <path d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg x-show="navOpen" x-cloak class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                            <path d="M6 6l12 12M18 6L6 18" />
+                        </svg>
+                    </button>
+                @else
+                    <a href="{{ route('login') }}" class="btn btn-ghost btn-sm">Masuk</a>
+                    <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Daftar</a>
+                @endauth
             </div>
-        @endif
+        </div>
 
-        @if (session('error'))
-            <div class="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800">
-                {{ session('error') }}
+        @auth
+            {{-- Panel navigasi layar kecil --}}
+            <div id="menu-mobile" x-show="navOpen" x-cloak
+                class="border-t border-line bg-raised lg:hidden">
+                <nav class="mx-auto max-w-5xl space-y-1 px-4 py-3" aria-label="Utama (mobile)">
+                    @foreach ($navItems as $item)
+                        <a href="{{ route($item['route']) }}"
+                            @class([
+                                'nav-link block w-full text-left',
+                                'nav-link-active' => str_starts_with($active, $item['match']),
+                            ])
+                            @if (str_starts_with($active, $item['match'])) aria-current="page" @endif>
+                            {{ $item['label'] }}
+                        </a>
+                    @endforeach
+                    <a href="{{ route('groups.create') }}" class="nav-link block w-full text-left">+ Bikin Group</a>
+
+                    <div class="flex items-center justify-between gap-3 pt-3 sm:hidden">
+                        <span class="flex items-center gap-2">
+                            <span class="avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                            <span class="text-sm font-semibold">{{ auth()->user()->name }}</span>
+                        </span>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button class="btn btn-secondary btn-sm">Keluar</button>
+                        </form>
+                    </div>
+                </nav>
             </div>
-        @endif
+        @endauth
+    </header>
+
+    <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-6 md:py-10">
+        @include('partials.flash')
 
         @yield('content')
     </main>
 
-    <footer class="mx-auto max-w-5xl px-4 pb-10 pt-4 text-center text-xs text-slate-400">
+    <footer class="mx-auto w-full max-w-5xl px-4 pb-10 pt-4 text-center text-xs text-ink-subtle">
         BagiRata · patungan gak ribet, yang penting nggak ada drama soal duit.
     </footer>
 </body>
