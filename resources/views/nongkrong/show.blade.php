@@ -8,46 +8,49 @@
     {{-- Header --}}
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
-            <a href="{{ $session->group ? route('groups.show', $session->group) : route('nongkrong.index') }}" class="text-sm font-semibold text-indigo-600 hover:underline">← {{ $session->group ? 'Group' : 'Nongkrong' }}</a>
+            <a href="{{ $session->group ? route('groups.show', $session->group) : route('nongkrong.index') }}" class="back-link">
+                ← {{ $session->group ? 'Group' : 'Nongkrong' }}
+            </a>
             <div class="mt-1 flex flex-wrap items-center gap-2">
-                <h1 class="text-2xl font-extrabold text-slate-900">{{ $session->name }}</h1>
-                <span class="rounded-full px-3 py-1 text-xs font-bold
-                    {{ $summary['status'] === 'settled' ? 'bg-emerald-50 text-emerald-700' : ($summary['status'] === 'active' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-600') }}">
-                    {{ $summary['status_label'] }}
-                </span>
+                <h1 class="page-title">{{ $session->name }}</h1>
+                <span class="badge {{ match ($summary['status']) {
+                    'settled' => 'badge-success',
+                    'active' => 'badge-warning',
+                    default => 'badge-neutral',
+                } }}">{{ $summary['status_label'] }}</span>
             </div>
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="muted mt-1">
                 {{ $session->date?->format('D, d M Y') }} · dibikin {{ $session->creator->name }}
                 @if ($session->group && $session->channel) · #{{ $session->channel->name }} @endif
             </p>
         </div>
 
         @if ($canAddExpense)
-            <a href="{{ route('expenses.create', $session) }}" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700">+ Catat pengeluaran</a>
+            <a href="{{ route('expenses.create', $session) }}" class="btn btn-primary">+ Catat pengeluaran</a>
         @endif
     </div>
 
     {{-- Summary --}}
     <div class="mt-6 grid gap-4 sm:grid-cols-3">
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Total dikeluarin</p>
-            <p class="mt-1 text-2xl font-extrabold text-slate-900">{{ $summary['total_spent_formatted'] }}</p>
+        <div class="stat stat-neutral">
+            <p class="stat-label">Total dikeluarin</p>
+            <p class="stat-value money">{{ $summary['total_spent_formatted'] }}</p>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Masih pending</p>
-            <p class="mt-1 text-2xl font-extrabold {{ $summary['total_pending'] > 0 ? 'text-amber-600' : 'text-emerald-600' }}">{{ $summary['total_pending_formatted'] }}</p>
+        <div class="stat {{ $summary['total_pending'] > 0 ? 'stat-warning' : 'stat-success' }}">
+            <p class="stat-label">Masih pending</p>
+            <p class="stat-value money">{{ $summary['total_pending_formatted'] }}</p>
         </div>
-        <div class="rounded-2xl border border-slate-200 bg-white p-5">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Saldo lo</p>
+        <div class="stat {{ $summary['viewer_role'] === 'creditor' ? 'stat-success' : ($summary['viewer_role'] === 'debtor' ? 'stat-danger' : 'stat-neutral') }}">
+            <p class="stat-label">Saldo lo</p>
             @if ($summary['viewer_role'] === 'creditor')
-                <p class="mt-1 text-2xl font-extrabold text-emerald-600">+{{ $summary['viewer_balance_formatted'] }}</p>
-                <p class="text-xs text-slate-400">dipiutangin, tinggal nagih</p>
+                <p class="stat-value money">+{{ $summary['viewer_balance_formatted'] }}</p>
+                <p class="text-xs text-ink-subtle">dipiutangin, tinggal nagih</p>
             @elseif ($summary['viewer_role'] === 'debtor')
-                <p class="mt-1 text-2xl font-extrabold text-rose-600">-{{ $summary['viewer_balance_formatted'] }}</p>
-                <p class="text-xs text-slate-400">masih ngutang, buruan bayar 😬</p>
+                <p class="stat-value money">-{{ $summary['viewer_balance_formatted'] }}</p>
+                <p class="text-xs text-ink-subtle">masih ngutang, buruan bayar 😬</p>
             @else
-                <p class="mt-1 text-2xl font-extrabold text-slate-900">0</p>
-                <p class="text-xs text-slate-400">fair banget</p>
+                <p class="stat-value money">0</p>
+                <p class="text-xs text-ink-subtle">fair banget</p>
             @endif
         </div>
     </div>
@@ -55,10 +58,10 @@
     <div class="mt-8 grid gap-6 lg:grid-cols-3">
         <div class="space-y-6 lg:col-span-2">
             {{-- Debts --}}
-            <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <h2 class="font-bold text-slate-900">Utang-piutang</h2>
-                    <a href="{{ route('debts.index', $session) }}" class="text-sm font-semibold text-indigo-600 hover:underline">Kelola →</a>
+            <section class="card">
+                <div class="flex items-center justify-between gap-3">
+                    <h2 class="section-title">Utang-piutang</h2>
+                    <a href="{{ route('debts.index', $session) }}" class="text-sm font-semibold text-brand-text hover:underline">Kelola →</a>
                 </div>
 
                 @php
@@ -67,48 +70,48 @@
                 @endphp
 
                 @if ($pendingDebts->isEmpty())
-                    <p class="mt-3 rounded-xl bg-slate-50 px-3 py-3 text-sm text-slate-400">Nggak ada utang pending, beres semua!</p>
+                    <p class="empty mt-3">Nggak ada utang pending, beres semua!</p>
                 @else
-                    <ul class="mt-3 divide-y divide-slate-100">
+                    <ul class="divide-list mt-3">
                         @foreach ($pendingDebts as $debt)
                             @php
-                                $badge = match ($debt->status) {
-                                    'payment_reported' => ['bg-amber-50 text-amber-700', 'Nunggu konfirmasi'],
-                                    'confirmed' => ['bg-indigo-50 text-indigo-700', 'Dikonfirmasi'],
-                                    'rejected' => ['bg-rose-50 text-rose-700', 'Ditolak'],
-                                    default => ['bg-slate-100 text-slate-600', 'Belum dibayar'],
+                                [$badgeClass, $badgeLabel] = match ($debt->status) {
+                                    'payment_reported' => ['badge-warning', 'Nunggu konfirmasi'],
+                                    'confirmed' => ['badge-brand', 'Dikonfirmasi'],
+                                    'rejected' => ['badge-danger', 'Ditolak'],
+                                    default => ['badge-neutral', 'Belum dibayar'],
                                 };
                             @endphp
                             <li class="flex flex-wrap items-center justify-between gap-2 py-3">
-                                <p class="text-sm text-slate-700">
+                                <p class="text-sm text-ink-muted">
                                     @if ($debt->from_user_id === $me)
-                                        Lu utang <strong class="text-rose-600">{{ number_format($debt->outstanding(), 0, ',', '.') }}</strong> ke <strong>{{ $debt->creditor->name }}</strong>
+                                        Lu utang <strong class="money text-danger-text">{{ number_format($debt->outstanding(), 0, ',', '.') }}</strong> ke <strong class="text-ink">{{ $debt->creditor->name }}</strong>
                                     @elseif ($debt->to_user_id === $me)
-                                        <strong>{{ $debt->debtor->name }}</strong> utang <strong class="text-emerald-600">{{ number_format($debt->outstanding(), 0, ',', '.') }}</strong> ke lu
+                                        <strong class="text-ink">{{ $debt->debtor->name }}</strong> utang <strong class="money text-success-text">{{ number_format($debt->outstanding(), 0, ',', '.') }}</strong> ke lu
                                     @else
-                                        <strong>{{ $debt->debtor->name }}</strong> utang <strong>{{ number_format($debt->outstanding(), 0, ',', '.') }}</strong> ke <strong>{{ $debt->creditor->name }}</strong>
+                                        <strong class="text-ink">{{ $debt->debtor->name }}</strong> utang <strong class="money">{{ number_format($debt->outstanding(), 0, ',', '.') }}</strong> ke <strong class="text-ink">{{ $debt->creditor->name }}</strong>
                                     @endif
                                 </p>
                                 <div class="flex items-center gap-2">
-                                    <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ $badge[0] }}">{{ $badge[1] }}</span>
-                                    <a href="{{ route('debts.show', [$session, $debt]) }}"
-                                        class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50">
+                                    <span class="badge {{ $badgeClass }}">{{ $badgeLabel }}</span>
+                                    <a href="{{ route('debts.show', [$session, $debt]) }}" class="btn btn-secondary btn-sm">
                                         {{ $me === $debt->from_user_id ? 'Udah bayar? Lapor' : 'Detail' }}
                                     </a>
                                 </div>
-                            </li>
                             </li>
                         @endforeach
                     </ul>
                 @endif
 
                 @if ($settledDebts->isNotEmpty())
-                    <h3 class="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">Udah beres</h3>
+                    <h3 class="mt-4 text-xs font-semibold uppercase tracking-wide text-ink-subtle">Udah beres</h3>
                     <ul class="mt-2 space-y-1.5">
                         @foreach ($settledDebts as $debt)
-                            <li class="text-sm text-slate-400 line-through">
-                                <strong>{{ $debt->debtor->name }}</strong> bayar <strong>{{ number_format($debt->amount, 0, ',', '.') }}</strong> ke <strong>{{ $debt->creditor->name }}</strong>
-                                <span class="ml-1 text-xs no-underline text-slate-400">({{ $debt->settled_at?->format('d M Y') }})</span>
+                            <li class="text-sm text-ink-subtle line-through">
+                                <strong>{{ $debt->debtor->name }}</strong> bayar
+                                <strong class="money">{{ number_format($debt->amount, 0, ',', '.') }}</strong> ke
+                                <strong>{{ $debt->creditor->name }}</strong>
+                                <span class="ml-1 text-xs no-underline">({{ $debt->settled_at?->format('d M Y') }})</span>
                             </li>
                         @endforeach
                     </ul>
@@ -116,16 +119,16 @@
             </section>
 
             {{-- Expenses --}}
-            <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                    <h2 class="font-bold text-slate-900">Pengeluaran</h2>
+            <section class="card">
+                <div class="flex items-center justify-between gap-3">
+                    <h2 class="section-title">Pengeluaran</h2>
                     @if ($canAddExpense)
-                        <a href="{{ route('expenses.create', $session) }}" class="text-sm font-semibold text-indigo-600 hover:underline">+ catat</a>
+                        <a href="{{ route('expenses.create', $session) }}" class="text-sm font-semibold text-brand-text hover:underline">+ catat</a>
                     @endif
                 </div>
 
                 @if ($session->expenses->isEmpty())
-                    <p class="mt-3 rounded-xl bg-slate-50 px-3 py-3 text-sm text-slate-400">Belum ada pengeluaran. Catat yang pertama dong!</p>
+                    <p class="empty mt-3">Belum ada pengeluaran. Catat yang pertama dong!</p>
                 @else
                     <div class="mt-4 space-y-4">
                         @foreach ($session->expenses->sortByDesc('created_at') as $expense)
@@ -135,20 +138,20 @@
                                     $canEditExpense = \App\Services\PermissionService::can(auth()->user(), $session->group, \App\Enums\Permission::MANAGE_PATUNGAN);
                                 }
                             @endphp
-                            <article class="rounded-2xl border border-slate-200 p-4">
+                            <article class="rounded-card border border-line p-4">
                                 <div class="flex flex-wrap items-start justify-between gap-2">
-                                    <div>
-                                        <h3 class="font-bold text-slate-900">{{ $expense->name }}</h3>
-                                        <p class="text-sm text-slate-500">
-                                            {{ $expense->category()->label() }} · bayar <strong>{{ $expense->payer->name }}</strong>
+                                    <div class="min-w-0">
+                                        <h3 class="font-bold text-ink">{{ $expense->name }}</h3>
+                                        <p class="text-sm text-ink-muted">
+                                            {{ $expense->category()->label() }} · bayar <strong class="text-ink">{{ $expense->payer->name }}</strong>
                                             @if ($expense->note) · "{{ $expense->note }}" @endif
                                         </p>
                                     </div>
-                                    <p class="text-lg font-extrabold text-slate-900">{{ number_format($expense->grandTotal(), 0, ',', '.') }}</p>
+                                    <p class="money text-lg font-extrabold text-ink">{{ number_format($expense->grandTotal(), 0, ',', '.') }}</p>
                                 </div>
 
                                 @if ($expense->discount_value > 0 || $expense->service_rate > 0 || $expense->tax_rate > 0)
-                                    <p class="mt-1 text-xs text-slate-400">
+                                    <p class="mt-1 text-xs text-ink-subtle">
                                         @if ($expense->discount_amount() > 0) diskon -{{ number_format($expense->discount_amount(), 0, ',', '.') }} · @endif
                                         @if ($expense->service_rate > 0) service {{ $expense->service_rate }}% ({{ number_format($expense->serviceAmount(), 0, ',', '.') }}) · @endif
                                         @if ($expense->tax_rate > 0) pajak {{ $expense->tax_rate }}% ({{ number_format($expense->taxAmount(), 0, ',', '.') }}) @endif
@@ -156,25 +159,26 @@
                                 @endif
 
                                 @if ($expense->receipt_photo)
-                                    <a href="{{ url('storage/' . $expense->receipt_photo) }}" target="_blank" class="mt-2 inline-block text-xs font-semibold text-indigo-600 hover:underline">🖼 Lihat struk</a>
+                                    <a href="{{ url('storage/' . $expense->receipt_photo) }}" target="_blank" rel="noopener"
+                                        class="mt-2 inline-block text-xs font-semibold text-brand-text hover:underline">🖼 Lihat struk</a>
                                 @endif
 
                                 <div class="mt-3 flex flex-wrap gap-1.5">
                                     @foreach ($expense->splits as $split)
-                                        <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600">
-                                            {{ $split->user->name }} <strong>{{ number_format($split->share_amount, 0, ',', '.') }}</strong>
+                                        <span class="badge badge-neutral">
+                                            {{ $split->user->name }} <strong class="money">{{ number_format($split->share_amount, 0, ',', '.') }}</strong>
                                         </span>
                                     @endforeach
                                 </div>
 
                                 @if ($canEditExpense)
                                     <div class="mt-3 flex gap-2">
-                                        <a href="{{ route('expenses.edit', [$session, $expense]) }}" class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">Edit</a>
+                                        <a href="{{ route('expenses.edit', [$session, $expense]) }}" class="btn btn-secondary btn-sm">Edit</a>
                                         <form method="POST" action="{{ route('expenses.cancel', [$session, $expense]) }}"
-                                            onsubmit="return confirm('Batalkan pengeluaran {{ $expense->name }}? Utang bakal diitung ulang.')">
+                                            onsubmit="return confirm('Batalkan pengeluaran {{ $expense->name }}? Utang bakal dihitung ulang.')">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50">Batalkan</button>
+                                            <button class="btn btn-ghost btn-sm text-danger-text hover:bg-danger-soft">Batalkan</button>
                                         </form>
                                     </div>
                                 @endif
@@ -187,20 +191,20 @@
 
         {{-- Member balances --}}
         <aside class="h-fit space-y-6">
-            <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h2 class="font-bold text-slate-900">Posisi tiap orang</h2>
+            <section class="card">
+                <h2 class="section-title">Posisi tiap orang</h2>
                 <ul class="mt-3 space-y-2.5">
                     @foreach ($session->members as $member)
                         @php $bal = $balances[$member->id] ?? 0; @endphp
                         <li class="flex items-center justify-between gap-2 text-sm">
-                            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-indigo-100 font-bold text-indigo-600">{{ strtoupper(substr($member->name, 0, 1)) }}</span>
-                            <span class="min-w-0 flex-1 truncate font-semibold text-slate-800">{{ $member->name }}</span>
+                            <span class="avatar">{{ strtoupper(substr($member->name, 0, 1)) }}</span>
+                            <span class="min-w-0 flex-1 truncate font-semibold text-ink">{{ $member->name }}</span>
                             @if ($bal > 0)
-                                <span class="font-bold text-emerald-600">+{{ number_format($bal, 0, ',', '.') }}</span>
+                                <span class="money font-bold text-success-text">+{{ number_format($bal, 0, ',', '.') }}</span>
                             @elseif ($bal < 0)
-                                <span class="font-bold text-rose-600">-{{ number_format(abs($bal), 0, ',', '.') }}</span>
+                                <span class="money font-bold text-danger-text">-{{ number_format(abs($bal), 0, ',', '.') }}</span>
                             @else
-                                <span class="text-slate-400">0</span>
+                                <span class="text-ink-subtle">0</span>
                             @endif
                         </li>
                     @endforeach
@@ -208,9 +212,9 @@
             </section>
 
             @if ($session->description)
-                <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <h2 class="font-bold text-slate-900">Catatan</h2>
-                    <p class="mt-1 text-sm text-slate-600">{{ $session->description }}</p>
+                <section class="card">
+                    <h2 class="section-title">Catatan</h2>
+                    <p class="mt-1 text-sm text-ink-muted">{{ $session->description }}</p>
                 </section>
             @endif
         </aside>
