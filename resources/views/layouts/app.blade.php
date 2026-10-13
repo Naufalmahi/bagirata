@@ -8,22 +8,7 @@
     <link rel="icon" type="image/png" href="{{ asset('image/logo.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {{-- Script anti-flash sinkron sebelum CSS/body di-render --}}
-    <script>
-        (function () {
-            try {
-                const stored = localStorage.getItem('bagirata-theme');
-                const dark = stored === 'dark' || (!stored && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                if (dark) {
-                    document.documentElement.classList.add('dark');
-                    document.documentElement.style.colorScheme = 'dark';
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    document.documentElement.style.colorScheme = 'light';
-                }
-            } catch (e) {}
-        })();
-    </script>
+
 </head>
 <body class="flex min-h-screen flex-col bg-[#f8fafc] text-slate-800 antialiased selection:bg-purple-100 selection:text-purple-900">
     @php
@@ -37,6 +22,7 @@
             ['route' => 'calculator.index', 'label' => 'Kalkulator', 'match' => 'calculator'],
             ['route' => 'budgets.index', 'label' => 'Budgeting', 'match' => 'budgets'],
             ['route' => 'debts.overview', 'label' => 'Utang-Piutang', 'match' => 'debts'],
+            ['route' => 'friends.index', 'label' => 'Teman', 'match' => 'friends'],
         ];
     @endphp
 
@@ -85,15 +71,7 @@
                     </nav>
                 @endauth
 
-                {{-- Tombol Aksi Kanan --}}
-                <div class="flex items-center gap-2.5 sm:gap-3">
-                    {{-- Toggle Tema Cepat --}}
-                    <button type="button" @click="$store.theme.toggle()" class="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-white/90 hover:bg-white/20 hover:text-white transition" title="Ganti Tema">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                        </svg>
-                    </button>
-
+                <div class="flex items-center gap-3 sm:gap-3.5">
                     @auth
                         <a href="{{ route('groups.create') }}" class="inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm transition hover:bg-white/25 border border-white/20">
                             <span>+ Group</span>
@@ -103,25 +81,23 @@
                             <span>+ Nongkrong</span>
                         </a>
 
-                        {{-- Link ke Profil Pengguna --}}
-                        <a href="{{ route('profile.show') }}" class="hidden items-center gap-2.5 pl-2 md:flex border-l border-white/20 group hover:opacity-90 transition" title="Lihat Profil Saya">
+                        {{-- Link ke Profil Pengguna (hanya avatar) --}}
+                        <a href="{{ route('profile.show') }}" class="hidden md:flex items-center pl-3 border-l border-white/20 hover:opacity-80 transition" title="Lihat Profil Saya">
                             @if (auth()->user()->avatar_path)
-                                <img src="{{ asset('storage/' . auth()->user()->avatar_path) }}" alt="{{ auth()->user()->name }}" class="h-8 w-8 rounded-full object-cover ring-2 ring-white/40">
+                                <img src="{{ asset('storage/' . auth()->user()->avatar_path) }}" alt="{{ auth()->user()->name }}" class="h-9 w-9 rounded-full object-cover ring-2 ring-white/40">
                             @else
-                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-xs font-black text-white ring-1 ring-white/40">
+                                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-sm font-black text-white ring-2 ring-white/40">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 </span>
                             @endif
-                            <div class="flex flex-col text-left">
-                                <span class="max-w-[7.5rem] truncate text-xs font-bold text-white group-hover:text-sky-200 transition">{{ auth()->user()->name }}</span>
-                                <span class="text-[10px] text-indigo-200">Profil Saya</span>
-                            </div>
                         </a>
 
                         <form method="POST" action="{{ route('logout') }}" class="hidden sm:block">
                             @csrf
-                            <button type="submit" class="rounded-xl px-2.5 py-1.5 text-xs font-semibold text-white/80 hover:bg-white/15 hover:text-white transition" title="Keluar">
-                                Keluar
+                            <button type="submit" class="flex h-9 w-9 items-center justify-center rounded-xl text-white/70 hover:bg-white/15 hover:text-white transition" title="Keluar">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
                             </button>
                         </form>
                     @else
@@ -158,16 +134,13 @@
                 @auth
                     <a href="{{ route('profile.show') }}" class="mb-3 flex items-center gap-3 border-b border-white/15 pb-3 hover:bg-white/5 p-2 rounded-xl transition">
                         @if (auth()->user()->avatar_path)
-                            <img src="{{ asset('storage/' . auth()->user()->avatar_path) }}" alt="{{ auth()->user()->name }}" class="h-9 w-9 rounded-full object-cover">
+                            <img src="{{ asset('storage/' . auth()->user()->avatar_path) }}" alt="{{ auth()->user()->name }}" class="h-9 w-9 rounded-full object-cover ring-1 ring-white/30">
                         @else
                             <span class="flex h-9 w-9 items-center justify-center rounded-full bg-white text-indigo-700 font-bold">
                                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                             </span>
                         @endif
-                        <div>
-                            <p class="text-sm font-bold">{{ auth()->user()->name }}</p>
-                            <p class="text-xs text-indigo-200">Lihat & Edit Profil Saya →</p>
-                        </div>
+                        <p class="text-sm font-bold">{{ auth()->user()->name }}</p>
                     </a>
 
                     <nav class="space-y-1.5" aria-label="Utama (mobile)">
@@ -184,9 +157,6 @@
                         @endforeach
 
                         <div class="pt-3 border-t border-white/15 flex flex-col gap-2">
-                            <a href="{{ route('profile.show') }}" class="flex items-center justify-center rounded-xl bg-white/20 px-4 py-2 text-sm font-bold text-white hover:bg-white/30">
-                                Profil Saya
-                            </a>
                             <a href="{{ route('nongkrong.create') }}" class="flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-bold text-indigo-700">
                                 + Buat Nongkrong Baru
                             </a>
@@ -195,8 +165,10 @@
                             </a>
                             <form method="POST" action="{{ route('logout') }}" class="pt-2">
                                 @csrf
-                                <button class="w-full rounded-xl bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 hover:bg-red-500/30">
-                                    Keluar Akun
+                                <button class="w-full flex items-center justify-center gap-2 rounded-xl bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 hover:bg-red-500/30">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
                                 </button>
                             </form>
                         </div>
@@ -215,11 +187,6 @@
                 @endauth
             </div>
         </header>
-    @else
-        {{-- Hidden element theme toggle helper untuk auth pages --}}
-        <div class="hidden" aria-hidden="true">
-            <button @click="$store.theme.toggle()" type="button">Theme</button>
-        </div>
     @endunless
 
     {{-- Main Content --}}

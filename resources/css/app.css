@@ -37,34 +37,7 @@
         --info-text: 7 89 133;
     }
 
-    .dark {
-        --surface: 255 255 255; /* white */
-        --raised: 255 255 255; /* white */
-        --sunken: 248 250 252; /* slate-50 */
-        --line: 226 232 240; /* slate-200 */
-        --line-strong: 203 213 225; /* slate-300 */
-        --ink: 30 41 59; /* slate-800 */
-        --ink-muted: 100 116 139; /* slate-500 */
-        --ink-subtle: 148 163 184; /* slate-400 */
 
-        --brand: 124 58 237; /* violet-600 */
-        --brand-hover: 109 40 217; /* violet-700 */
-        --brand-soft: 237 233 254; /* violet-50 */
-        --brand-text: 109 40 217; /* violet-700 */
-
-        --success: 16 185 129;
-        --success-soft: 209 250 229;
-        --success-text: 6 95 70;
-        --warning: 245 158 11;
-        --warning-soft: 254 243 199;
-        --warning-text: 120 53 15;
-        --danger: 225 29 72;
-        --danger-soft: 255 228 230;
-        --danger-text: 136 19 55;
-        --info: 14 165 233;
-        --info-soft: 224 242 254;
-        --info-text: 7 89 133;
-    }
 
     html {
         -webkit-text-size-adjust: 100%;

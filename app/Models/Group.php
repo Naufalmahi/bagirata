@@ -17,6 +17,7 @@ class Group extends Model
         'description',
         'avatar_path',
         'category',
+        'visibility',
     ];
 
     public function owner()

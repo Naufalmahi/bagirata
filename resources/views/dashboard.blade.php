@@ -23,7 +23,7 @@
                         <span class="text-xs text-white/80">· {{ now()->translatedFormat('l, d F Y') }}</span>
                     </div>
                     <h1 class="mt-1 text-2xl sm:text-3xl font-black tracking-tight">
-                        Halo, {{ auth()->user()->name }}! 👋
+                        Halo, {{ auth()->user()->name }}!
                     </h1>
                     <p class="text-sm text-indigo-100 mt-0.5">
                         Kelola patungan, pantau saldo circle, dan pastikan utang terselesaikan tanpa drama.
@@ -58,7 +58,7 @@
                 </svg>
             </div>
             <div class="flex-1">
-                <h3 class="font-bold text-emerald-950 text-base">Semuanya Bersih & Lunas! 🎉</h3>
+                <h3 class="font-bold text-emerald-950 text-base">Semuanya Bersih & Lunas!</h3>
                 <p class="text-sm text-emerald-700 mt-0.5 leading-relaxed">
                     Tidak ada utang maupun piutang pending di semua sesi nongkrong kamu saat ini. Pertemanan tetap damai dan aman!
                 </p>

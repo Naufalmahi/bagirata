@@ -7,17 +7,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Dark mode pakai kelas `dark` di <html> (Tailwind `darkMode: 'class'`), bukan
- * `@media (prefers-color-scheme)`. Alasannya, override manual dari pengguna
- * harus bisa menang atas preferensi sistem.
- *
- * Konsekuensinya ada dua titik rapuh yang diuji di sini:
- *
- *  1. Inline script anti-flash di <head> harus tetap sinkron dan tidak
- *     bergantung Alpine. Kalau hilang, halaman berkedip putih (FOUC) setiap
- *     reload untuk pengguna mode gelap.
- *  2. Kunci localStorage di Blade harus sama dengan THEME_KEY di app.js,
- *     kalau tidak pilihan user hilang tiap refresh.
+ * Pengujian bahwa fitur mode malam telah dihapus sesuai permintaan pengguna:
+ * tombol theme toggle dan script anti-flash tidak lagi dimuat di aplikasi.
  */
 class ThemeToggleTest extends TestCase
 {
@@ -28,55 +19,24 @@ class ThemeToggleTest extends TestCase
         return (string) file_get_contents(resource_path('views/layouts/app.blade.php'));
     }
 
-    public function test_layout_memuat_script_anti_flash_sebelum_body(): void
-    {
-        $response = $this->get(route('login'));
-
-        $response->assertOk();
-        $response->assertSee('prefers-color-scheme: dark', false);
-    }
-
-    public function test_script_anti_flash_tidak_bergantung_alpine(): void
+    public function test_mode_malam_telah_dihapus_dari_layout(): void
     {
         $html = $this->html();
 
-        $this->assertStringContainsString('localStorage.getItem', $html);
-        $this->assertStringNotContainsString('@click', substr($html, 0, (int) strpos($html, '</head>')),
-            'Script anti-flash tidak boleh memakai Alpine: Alpine dimuat lewat @vite dan sudah terlambat.');
+        $this->assertStringNotContainsString('$store.theme.toggle()', $html);
+        $this->assertStringNotContainsString('bagirata-theme', $html);
     }
 
-    public function test_kunci_localstorage_blade_sama_dengan_app_js(): void
+    public function test_tombol_tema_tidak_tampil_untuk_tamu_dan_pengguna(): void
     {
-        $js = (string) file_get_contents(resource_path('js/app.js'));
-
-        $this->assertMatchesRegularExpression(
-            "/THEME_KEY\s*=\s*'([^']+)'/",
-            $js,
-            'app.js harus mendeklarasikan THEME_KEY sebagai literal string.'
-        );
-
-        preg_match("/THEME_KEY\s*=\s*'([^']+)'/", $js, $m);
-
-        $this->assertStringContainsString(
-            "'{$m[1]}'",
-            $this->html(),
-            "Kunci localStorage di Blade ({$m[1]}) harus sama dengan THEME_KEY di app.js, "
-            .'kalau tidak preferensi tema user hilang tiap refresh.'
-        );
-    }
-
-    public function test_tombol_tema_tampil_untuk_tamu_dan_pengguna(): void
-    {
-        // Halaman marketing pun perlu hormati mode gelap, jadi tombolnya di luar
-        // blok @auth dan harus muncul untuk tamu juga.
         $this->get(route('login'))
             ->assertOk()
-            ->assertSee('$store.theme.toggle()', false);
+            ->assertDontSee('$store.theme.toggle()', false);
 
         $user = User::factory()->create();
         $this->actingAs($user)->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('$store.theme.toggle()', false);
+            ->assertDontSee('$store.theme.toggle()', false);
     }
 
     public function test_halaman_tamu_punya_link_masuk_dan_daftar(): void

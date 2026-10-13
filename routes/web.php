@@ -72,6 +72,16 @@ Route::middleware('auth')->group(function () {
     Route::patch('/groups/{group}/roles/{role}', [GroupController::class, 'updateRole'])->name('groups.roles.update');
     Route::delete('/groups/{group}/roles/{role}', [GroupController::class, 'destroyRole'])->name('groups.roles.destroy');
     Route::post('/groups/{group}/members/{member}/role', [GroupController::class, 'assignRole'])->name('groups.members.role');
+    Route::post('/groups/{group}/join', [GroupController::class, 'joinPublic'])->name('groups.join');
+    Route::post('/groups/{group}/kick', [GroupController::class, 'kickMember'])->name('groups.kick');
+
+    // ==== Friends ====
+    Route::get('/friends', [\App\Http\Controllers\Web\FriendshipController::class, 'index'])->name('friends.index');
+    Route::get('/friends/search', [\App\Http\Controllers\Web\FriendshipController::class, 'search'])->name('friends.search');
+    Route::post('/friends/request/{user}', [\App\Http\Controllers\Web\FriendshipController::class, 'sendRequest'])->name('friends.request');
+    Route::post('/friends/{friendship}/accept', [\App\Http\Controllers\Web\FriendshipController::class, 'accept'])->name('friends.accept');
+    Route::post('/friends/{friendship}/reject', [\App\Http\Controllers\Web\FriendshipController::class, 'reject'])->name('friends.reject');
+    Route::delete('/friends/{friendship}', [\App\Http\Controllers\Web\FriendshipController::class, 'remove'])->name('friends.remove');
 
     // ==== Treasury ====
     Route::get('/groups/{group}/treasury', [\App\Http\Controllers\Web\TreasuryController::class, 'show'])->name('groups.treasury.show');

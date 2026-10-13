@@ -17,14 +17,34 @@
         <div class="bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 px-6 py-5 sm:px-8 text-white">
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-2xl font-black text-white shadow-inner backdrop-blur-md ring-2 ring-white/30">
-                        {{ strtoupper(substr($group->name, 0, 1)) }}
-                    </div>
+                    @if ($group->avatar_path)
+                        <img src="{{ asset('storage/' . $group->avatar_path) }}" alt="{{ $group->name }}" class="h-14 w-14 shrink-0 rounded-2xl object-cover ring-2 ring-white/30 shadow-md">
+                    @else
+                        <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-2xl font-black text-white shadow-inner backdrop-blur-md ring-2 ring-white/30">
+                            {{ strtoupper(substr($group->name, 0, 1)) }}
+                        </div>
+                    @endif
                     <div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex flex-wrap items-center gap-2">
                             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white">{{ $group->name }}</h1>
                             <span class="rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-bold text-indigo-100">
                                 {{ $memberCount }} Member
+                            </span>
+                            @if ($group->visibility === 'private')
+                                <span class="rounded-full bg-amber-400/20 px-2 py-0.5 text-[11px] font-bold text-amber-200 inline-flex items-center gap-1">
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                    Private
+                                </span>
+                            @else
+                                <span class="rounded-full bg-emerald-400/20 px-2 py-0.5 text-[11px] font-bold text-emerald-200 inline-flex items-center gap-1">
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    Public
+                                </span>
+                            @endif
+                            {{-- Indikator Enkripsi End to End --}}
+                            <span class="rounded-full bg-sky-400/20 px-2 py-0.5 text-[10px] font-bold text-sky-200 inline-flex items-center gap-1" title="Pesan dan data patungan terlindungi keamanan End-to-End">
+                                <svg class="h-3 w-3 text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                                End-to-End Encrypted
                             </span>
                         </div>
                         <p class="text-xs sm:text-sm text-indigo-100/90 mt-0.5">
@@ -353,11 +373,103 @@
                                     </div>
                                 </div>
                             </a>
+
+                            {{-- Tombol Kick Anggota --}}
+                            @if (!empty($can['manage_roles']) && $member->user_id !== $group->user_id)
+                                <div class="px-2 pb-1 flex justify-end">
+                                    <form method="POST" action="{{ route('groups.kick', $group) }}" onsubmit="return confirm('Keluarkan {{ $member->user->name }} dari grup ini?')">
+                                        @csrf
+                                        <input type="hidden" name="user_id" value="{{ $member->user_id }}">
+                                        <button type="submit" class="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-500 hover:text-rose-700 hover:underline transition">
+                                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+                                            </svg>
+                                            Keluarkan
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
                         </li>
                     @endforeach
                 </ul>
             </div>
         </div>
+    </div>
+
+    {{-- SECTION: DAFTAR ANGGOTA YANG SEDANG HUTANG & JATUH TEMPO --}}
+    <div class="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-2.5">
+                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-slate-900">Status Hutang Anggota Grup</h3>
+                    <p class="text-xs text-slate-500">Daftar anggota yang memiliki tanggungan belum lunas di circle ini</p>
+                </div>
+            </div>
+            @if (isset($groupDebts))
+                <span class="rounded-full bg-rose-50 border border-rose-100 px-3 py-1 text-xs font-bold text-rose-700">
+                    {{ $groupDebts->count() }} Tagihan Aktif
+                </span>
+            @endif
+        </div>
+
+        @if (isset($groupDebts) && $groupDebts->isNotEmpty())
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                @foreach ($groupDebts as $debt)
+                    <div class="flex items-center justify-between gap-3 rounded-2xl border border-rose-100 bg-rose-50/30 p-4 transition hover:bg-rose-50/60">
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                @if ($debt->debtor->avatar_path)
+                                    <img src="{{ asset('storage/' . $debt->debtor->avatar_path) }}" alt="{{ $debt->debtor->name }}" class="h-10 w-10 rounded-full object-cover ring-1 ring-rose-200">
+                                @else
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-xs font-bold text-rose-700">
+                                        {{ strtoupper(substr($debt->debtor->name, 0, 1)) }}
+                                    </div>
+                                @endif
+                                <span class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-rose-500 ring-2 ring-white" title="Hutang belum lunas"></span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-900">{{ $debt->debtor->name }}</p>
+                                <p class="text-[11px] text-slate-500">
+                                    Hutang ke: <span class="font-semibold text-slate-700">{{ $debt->creditor->name }}</span>
+                                </p>
+                                <p class="text-[10px] text-indigo-600 font-medium">
+                                    Sesi: {{ $debt->session->name ?? 'Patungan' }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="text-right">
+                            <span class="text-xs font-black text-rose-600 block">
+                                Rp{{ number_format($debt->amount - ($debt->paid_amount ?? 0), 0, ',', '.') }}
+                            </span>
+                            @if ($debt->due_date)
+                                @php $isPast = $debt->due_date->isPast(); @endphp
+                                <span class="inline-flex items-center gap-0.5 text-[10px] font-semibold {{ $isPast ? 'text-rose-600' : 'text-slate-500' }}">
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    {{ $isPast ? 'Jatuh tempo lewat!' : 'Jatuh tempo: ' . $debt->due_date->format('d M Y') }}
+                                </span>
+                            @else
+                                <span class="text-[10px] text-slate-400">Tanpa jatuh tempo</span>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="mt-4 rounded-2xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-500">
+                <svg class="mx-auto h-7 w-7 text-emerald-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Semua anggota bersih! Tidak ada tanggungan hutang yang tertunggak di grup ini.
+            </div>
+        @endif
     </div>
 </div>
 

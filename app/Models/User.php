@@ -72,4 +72,45 @@ class User extends Authenticatable
             ->withPivot('joined_at')
             ->withTimestamps();
     }
+
+    public function sentFriendRequests()
+    {
+        return $this->hasMany(Friendship::class, 'sender_id');
+    }
+
+    public function receivedFriendRequests()
+    {
+        return $this->hasMany(Friendship::class, 'receiver_id');
+    }
+
+    public function friends()
+    {
+        $sentIds = Friendship::where('sender_id', $this->id)
+            ->where('status', 'accepted')
+            ->pluck('receiver_id');
+
+        $receivedIds = Friendship::where('receiver_id', $this->id)
+            ->where('status', 'accepted')
+            ->pluck('sender_id');
+
+        return User::whereIn('id', $sentIds->merge($receivedIds));
+    }
+
+    public function isFriendWith(User $user): bool
+    {
+        return Friendship::where(function ($q) use ($user) {
+            $q->where('sender_id', $this->id)->where('receiver_id', $user->id);
+        })->orWhere(function ($q) use ($user) {
+            $q->where('sender_id', $user->id)->where('receiver_id', $this->id);
+        })->where('status', 'accepted')->exists();
+    }
+
+    public function friendshipWith(User $user)
+    {
+        return Friendship::where(function ($q) use ($user) {
+            $q->where('sender_id', $this->id)->where('receiver_id', $user->id);
+        })->orWhere(function ($q) use ($user) {
+            $q->where('sender_id', $user->id)->where('receiver_id', $this->id);
+        })->first();
+    }
 }

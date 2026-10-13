@@ -31,7 +31,21 @@ class GroupController extends Controller
             ->latest()
             ->get();
 
-        return view('groups.index', compact('groups'));
+        $searchQuery = $request->input('search', '');
+        $publicGroups = collect();
+
+        if (strlen(trim($searchQuery)) >= 2) {
+            $userGroupIds = $request->user()->groups()->pluck('groups.id');
+            $publicGroups = Group::where('visibility', 'public')
+                ->whereNotIn('id', $userGroupIds)
+                ->where('name', 'like', "%{$searchQuery}%")
+                ->withCount('members')
+                ->with('owner')
+                ->limit(20)
+                ->get();
+        }
+
+        return view('groups.index', compact('groups', 'publicGroups', 'searchQuery'));
     }
 
     public function create()
@@ -41,7 +55,13 @@ class GroupController extends Controller
 
     public function store(StoreGroupRequest $request)
     {
-        $group = GroupService::create($request->user(), $request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('avatar')) {
+            $data['avatar_path'] = $request->file('avatar')->store('group-avatars', 'public');
+        }
+
+        $group = GroupService::create($request->user(), $data);
 
         return redirect()->route('groups.show', $group)
             ->with('success', 'Group kebikin, langsung aja undang temenmu!');
@@ -94,7 +114,14 @@ class GroupController extends Controller
                 || PermissionService::can($request->user(), $group, Permission::MANAGE_PATUNGAN),
         ];
 
-        return view('groups.show', compact('group', 'sessions', 'channels', 'activeChannel', 'messages', 'permissions', 'can'));
+        // Debt tracking: find members with outstanding debts in this group
+        $groupDebts = \App\Models\Debt::whereHas('session', function ($q) use ($group) {
+            $q->where('group_id', $group->id);
+        })->where('status', '!=', 'settled')
+          ->with(['debtor', 'creditor', 'session'])
+          ->get();
+
+        return view('groups.show', compact('group', 'sessions', 'channels', 'activeChannel', 'messages', 'permissions', 'can', 'groupDebts'));
     }
 
     public function manage(Request $request, Group $group)
@@ -117,7 +144,13 @@ class GroupController extends Controller
 
     public function update(UpdateGroupRequest $request, Group $group)
     {
-        $group->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('avatar')) {
+            $data['avatar_path'] = $request->file('avatar')->store('group-avatars', 'public');
+        }
+
+        $group->update($data);
 
         return back()->with('success', 'Group ke-update.');
     }
@@ -318,5 +351,45 @@ class GroupController extends Controller
                 'created_at' => $m->created_at->format('H:i'),
             ]),
         ]);
+    }
+
+    public function joinPublic(Request $request, Group $group)
+    {
+        if ($group->visibility !== 'public') {
+            return back()->with('error', 'Grup ini bersifat private.');
+        }
+
+        if ($group->isMember($request->user())) {
+            return back()->with('error', 'Kamu sudah menjadi anggota grup ini.');
+        }
+
+        $memberRole = $group->roles()->where('is_system', true)->where('name', 'Member')->first();
+
+        $group->members()->create([
+            'user_id' => $request->user()->id,
+            'role_id' => $memberRole?->id,
+        ]);
+
+        return redirect()->route('groups.show', $group)
+            ->with('success', 'Berhasil bergabung ke grup!');
+    }
+
+    public function kickMember(Request $request, Group $group)
+    {
+        $this->authorize('manageRoles', $group);
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'integer'],
+        ]);
+
+        $member = $group->members()->where('user_id', $validated['user_id'])->firstOrFail();
+
+        if ($member->user_id === $group->user_id) {
+            return back()->with('error', 'Tidak bisa mengeluarkan owner grup.');
+        }
+
+        $member->delete();
+
+        return back()->with('success', 'Anggota berhasil dikeluarkan dari grup.');
     }
 }

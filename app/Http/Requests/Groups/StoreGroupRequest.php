@@ -16,6 +16,8 @@ class StoreGroupRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:60'],
             'description' => ['nullable', 'string', 'max:500'],
+            'visibility' => ['nullable', 'in:public,private'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ];
     }
 }
