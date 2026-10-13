@@ -18,10 +18,10 @@
         --ink-muted: 100 116 139; /* slate-500 */
         --ink-subtle: 148 163 184; /* slate-400 */
 
-        --brand: 79 70 229; /* indigo-600 */
-        --brand-hover: 67 56 202; /* indigo-700 */
-        --brand-soft: 238 242 255; /* indigo-50 */
-        --brand-text: 67 56 202; /* indigo-700 */
+        --brand: 124 58 237; /* violet-600 */
+        --brand-hover: 109 40 217; /* violet-700 */
+        --brand-soft: 237 233 254; /* violet-50 */
+        --brand-text: 109 40 217; /* violet-700 */
 
         --success: 16 185 129;
         --success-soft: 209 250 229;
@@ -38,32 +38,32 @@
     }
 
     .dark {
-        --surface: 2 6 23; /* slate-950 */
-        --raised: 15 23 42; /* slate-900 */
-        --sunken: 30 41 59; /* slate-800 */
-        --line: 30 41 59; /* slate-800 */
-        --line-strong: 51 65 85; /* slate-700 */
-        --ink: 226 232 240; /* slate-200 */
-        --ink-muted: 148 163 184; /* slate-400 */
-        --ink-subtle: 100 116 139; /* slate-500 */
+        --surface: 255 255 255; /* white */
+        --raised: 255 255 255; /* white */
+        --sunken: 248 250 252; /* slate-50 */
+        --line: 226 232 240; /* slate-200 */
+        --line-strong: 203 213 225; /* slate-300 */
+        --ink: 30 41 59; /* slate-800 */
+        --ink-muted: 100 116 139; /* slate-500 */
+        --ink-subtle: 148 163 184; /* slate-400 */
 
-        --brand: 129 140 248; /* indigo-400 */
-        --brand-hover: 165 180 252; /* indigo-300 */
-        --brand-soft: 30 27 75; /* indigo-950 */
-        --brand-text: 199 210 254; /* indigo-300 */
+        --brand: 124 58 237; /* violet-600 */
+        --brand-hover: 109 40 217; /* violet-700 */
+        --brand-soft: 237 233 254; /* violet-50 */
+        --brand-text: 109 40 217; /* violet-700 */
 
-        --success: 52 211 153;
-        --success-soft: 6 78 59;
-        --success-text: 110 231 183;
-        --warning: 251 191 36;
-        --warning-soft: 120 53 15;
-        --warning-text: 252 211 77;
-        --danger: 251 113 133;
-        --danger-soft: 136 19 55;
-        --danger-text: 253 164 175;
-        --info: 56 189 248;
-        --info-soft: 7 54 93;
-        --info-text: 125 211 252;
+        --success: 16 185 129;
+        --success-soft: 209 250 229;
+        --success-text: 6 95 70;
+        --warning: 245 158 11;
+        --warning-soft: 254 243 199;
+        --warning-text: 120 53 15;
+        --danger: 225 29 72;
+        --danger-soft: 255 228 230;
+        --danger-text: 136 19 55;
+        --info: 14 165 233;
+        --info-soft: 224 242 254;
+        --info-text: 7 89 133;
     }
 
     html {
@@ -71,16 +71,16 @@
     }
 
     body {
-        @apply bg-surface text-ink font-sans antialiased;
+        @apply bg-[#f8fafc] text-slate-800 font-sans antialiased min-h-screen;
     }
 
     ::selection {
-        @apply bg-brand/25;
+        @apply bg-indigo-500/20 text-indigo-900;
     }
 
     /* Fokus keyboard harus kelihatan jelas di light maupun dark. */
     :focus-visible {
-        @apply outline-none ring-2 ring-brand ring-offset-2 ring-offset-surface;
+        @apply outline-none ring-2 ring-indigo-500 ring-offset-2 ring-offset-white;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -100,48 +100,48 @@
        Tombol
        --------------------------------------------------------- */
     .btn {
-        @apply inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-control border border-transparent
-               px-4 py-2.5 text-sm font-semibold leading-none transition
+        @apply inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-transparent
+               px-5 py-3 text-sm font-bold leading-none transition-all duration-200
                disabled:pointer-events-none disabled:opacity-50;
     }
 
     .btn-primary {
-        @apply bg-brand text-white hover:bg-brand-hover active:scale-[0.98];
+        @apply bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 active:scale-95 shadow-md shadow-indigo-300/40;
     }
 
     .btn-secondary {
-        @apply border border-line bg-raised text-ink hover:bg-sunken active:scale-[0.98];
+        @apply border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98];
     }
 
     .btn-ghost {
-        @apply text-ink-muted hover:bg-sunken hover:text-ink;
+        @apply text-slate-500 hover:bg-slate-100 hover:text-slate-800;
     }
 
     .btn-danger {
-        @apply bg-danger text-white hover:opacity-90 active:scale-[0.98];
+        @apply bg-rose-600 text-white hover:bg-rose-700 active:scale-[0.98];
     }
 
     .btn-sm {
-        @apply px-3 py-1.5 text-xs;
+        @apply px-3.5 py-2 text-xs rounded-xl;
     }
 
     .btn-lg {
-        @apply px-6 py-3.5 text-base;
+        @apply px-6 py-3.5 text-base rounded-2xl;
     }
 
     .btn-icon {
-        @apply h-9 w-9 p-0;
+        @apply h-9 w-9 p-0 rounded-xl;
     }
 
     /* ---------------------------------------------------------
        Permukaan
        --------------------------------------------------------- */
     .card {
-        @apply rounded-card border border-line bg-raised p-5 shadow-card;
+        @apply rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm shadow-slate-100;
     }
 
     .card-hover {
-        @apply transition hover:border-line-strong hover:shadow-card-hover;
+        @apply transition-all duration-200 hover:border-indigo-300 hover:shadow-md hover:-translate-y-0.5;
     }
 
     .card-sunken {
@@ -149,7 +149,7 @@
     }
 
     .brand-mark {
-        @apply grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand text-base font-extrabold text-white;
+        @apply grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-tr from-blue-600 to-purple-600 text-base font-extrabold text-white shadow-md;
     }
 
     .avatar {

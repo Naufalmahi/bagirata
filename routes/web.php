@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\ExpenseController;
 use App\Http\Controllers\Web\GroupController;
 use App\Http\Controllers\Web\JoinController;
 use App\Http\Controllers\Web\NongkrongController;
+use App\Http\Controllers\Web\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,7 +27,9 @@ Route::get('/', function () {
     }
 
     return view('landing');
-})->name('home');
+})->name('landing');
+
+Route::get('/home', fn () => redirect()->route('landing'))->name('home');
 
 Route::get('/join/{token}', [JoinController::class, 'show'])->name('join.show');
 
@@ -44,6 +47,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // ==== Profile ====
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.user');
+
     // ==== Groups ====
     Route::resource('groups', GroupController::class)->except(['edit']);
 
@@ -55,6 +64,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/groups/{group}/channels', [GroupController::class, 'storeChannel'])->name('groups.channels.store');
     Route::patch('/groups/{group}/channels/{channel}', [GroupController::class, 'updateChannel'])->name('groups.channels.update');
     Route::delete('/groups/{group}/channels/{channel}', [GroupController::class, 'destroyChannel'])->name('groups.channels.destroy');
+
+    Route::post('/groups/{group}/channels/{channel}/messages', [GroupController::class, 'storeMessage'])->name('groups.channels.messages.store');
+    Route::get('/groups/{group}/channels/{channel}/messages', [GroupController::class, 'getMessages'])->name('groups.channels.messages.index');
 
     Route::post('/groups/{group}/roles', [GroupController::class, 'storeRole'])->name('groups.roles.store');
     Route::patch('/groups/{group}/roles/{role}', [GroupController::class, 'updateRole'])->name('groups.roles.update');

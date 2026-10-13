@@ -51,6 +51,16 @@ class GroupController extends Controller
     {
         $this->authorize('view', $group);
 
+        // Jika group belum punya channel sama sekali, buatkan channel general default
+        if ($group->channels()->count() === 0) {
+            $group->channels()->create([
+                'name' => 'general',
+                'description' => 'Channel obrolan umum & nongkrong',
+                'sort_order' => 1,
+                'created_by' => $group->user_id,
+            ]);
+        }
+
         $group->load([
             'owner',
             'roles',
@@ -67,6 +77,14 @@ class GroupController extends Controller
         $sessions = $group->sessions->sortByDesc(fn ($s) => $s->date?->timestamp ?? 0);
         $channels = $group->channels;
 
+        $channelId = $request->query('channel');
+        $activeChannel = $channelId ? $channels->firstWhere('id', (int) $channelId) : $channels->first();
+        if (! $activeChannel && $channels->isNotEmpty()) {
+            $activeChannel = $channels->first();
+        }
+
+        $messages = $activeChannel ? $activeChannel->messages()->with('user')->latest()->take(50)->get()->reverse()->values() : collect();
+
         $permissions = PermissionService::permissionsFor($request->user(), $group);
         $can = [
             'invite' => PermissionService::can($request->user(), $group, Permission::INVITE_MEMBERS),
@@ -76,7 +94,7 @@ class GroupController extends Controller
                 || PermissionService::can($request->user(), $group, Permission::MANAGE_PATUNGAN),
         ];
 
-        return view('groups.show', compact('group', 'sessions', 'channels', 'permissions', 'can'));
+        return view('groups.show', compact('group', 'sessions', 'channels', 'activeChannel', 'messages', 'permissions', 'can'));
     }
 
     public function manage(Request $request, Group $group)
@@ -242,5 +260,63 @@ class GroupController extends Controller
         $member->update(['role_id' => $role->id]);
 
         return back()->with('success', 'Role anggota ke-update.');
+    }
+
+    public function storeMessage(Request $request, Group $group, Channel $channel)
+    {
+        $this->authorize('view', $group);
+
+        if ($channel->group_id !== $group->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'body' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $message = $channel->messages()->create([
+            'user_id' => $request->user()->id,
+            'body' => $validated['body'],
+        ]);
+
+        if ($request->wantsJson()) {
+            $message->load('user');
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'id' => $message->id,
+                    'body' => $message->body,
+                    'user_id' => $message->user_id,
+                    'user_name' => $message->user->name,
+                    'avatar_url' => $message->user->avatar_path ? asset('storage/' . $message->user->avatar_path) : null,
+                    'created_at' => $message->created_at->format('H:i'),
+                ],
+            ]);
+        }
+
+        return redirect()->route('groups.show', ['group' => $group, 'channel' => $channel->id])
+            ->with('success', 'Pesan terkirim.');
+    }
+
+    public function getMessages(Request $request, Group $group, Channel $channel)
+    {
+        $this->authorize('view', $group);
+
+        if ($channel->group_id !== $group->id) {
+            abort(404);
+        }
+
+        $messages = $channel->messages()->with('user')->latest()->take(50)->get()->reverse()->values();
+
+        return response()->json([
+            'data' => $messages->map(fn ($m) => [
+                'id' => $m->id,
+                'body' => $m->body,
+                'user_id' => $m->user_id,
+                'user_name' => $m->user->name,
+                'avatar_url' => $m->user->avatar_path ? asset('storage/' . $m->user->avatar_path) : null,
+                'created_at' => $m->created_at->format('H:i'),
+            ]),
+        ]);
     }
 }
