@@ -63,6 +63,23 @@ export default {
                 current: 'currentColor',
                 inherit: 'inherit',
 
+                palette: {
+                    coral: '#EB9998',
+                    slatePurple: '#5D549C',
+                    dustySlate: '#6F70A2',
+                    plum: '#7E3A63',
+                    lavender: '#A373D3',
+                },
+                discord: {
+                    bg: '#110b17',
+                    main: '#1a1525',
+                    darker: '#1f1a2b',
+                    dark: '#2b253a',
+                    card: '#1f1a2b',
+                    border: 'rgba(255, 255, 255, 0.08)',
+                    gray: '#a19db0',
+                },
+
                 surface: 'rgb(var(--surface) / <alpha-value>)',
                 raised: 'rgb(var(--raised) / <alpha-value>)',
                 sunken: 'rgb(var(--sunken) / <alpha-value>)',

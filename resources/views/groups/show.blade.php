@@ -1,8 +1,7 @@
 @extends('layouts.app')
 
-@section('title', $group->name . ' · Circle')
+@section('title', '#' . ($activeChannel?->name ?? 'general') . ' · ' . $group->name)
 
-@section('content')
 @php
     $memberCount = $group->members->count();
     $channelCount = $channels->count();
@@ -11,463 +10,280 @@
     $groupLevelSessions = $sessions->where('channel_id', null);
 @endphp
 
-<div class="space-y-6">
-    {{-- Discord Server Banner / Header --}}
-    <div class="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-sm">
-        <div class="bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 px-6 py-5 sm:px-8 text-white">
-            <div class="flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    @if ($group->avatar_path)
-                        <img src="{{ asset('storage/' . $group->avatar_path) }}" alt="{{ $group->name }}" class="h-14 w-14 shrink-0 rounded-2xl object-cover ring-2 ring-white/30 shadow-md">
-                    @else
-                        <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-2xl font-black text-white shadow-inner backdrop-blur-md ring-2 ring-white/30">
-                            {{ strtoupper(substr($group->name, 0, 1)) }}
-                        </div>
-                    @endif
-                    <div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white">{{ $group->name }}</h1>
-                            <span class="rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-bold text-indigo-100">
-                                {{ $memberCount }} Member
-                            </span>
-                            @if ($group->visibility === 'private')
-                                <span class="rounded-full bg-amber-400/20 px-2 py-0.5 text-[11px] font-bold text-amber-200 inline-flex items-center gap-1">
-                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                                    Private
-                                </span>
-                            @else
-                                <span class="rounded-full bg-emerald-400/20 px-2 py-0.5 text-[11px] font-bold text-emerald-200 inline-flex items-center gap-1">
-                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                    Public
-                                </span>
-                            @endif
-                            {{-- Indikator Enkripsi End to End --}}
-                            <span class="rounded-full bg-sky-400/20 px-2 py-0.5 text-[10px] font-bold text-sky-200 inline-flex items-center gap-1" title="Pesan dan data patungan terlindungi keamanan End-to-End">
-                                <svg class="h-3 w-3 text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                                End-to-End Encrypted
-                            </span>
-                        </div>
-                        <p class="text-xs sm:text-sm text-indigo-100/90 mt-0.5">
-                            {{ $group->description ?? 'Circle nongkrong & patungan santai tanpa drama.' }}
-                        </p>
-                    </div>
+{{-- ========================================================
+     KOLOM 2: CHANNELS & SUB-GRUP SIDEBAR (ALA DISCORD ASLI)
+     ======================================================== --}}
+@section('sidebar')
+    <!-- Server / Group Title Header -->
+    <div class="px-2 pt-1 pb-3 border-b border-white/5">
+        <div class="flex items-center gap-3">
+            @if ($group->avatar_path)
+                <img src="{{ asset('storage/' . $group->avatar_path) }}" alt="{{ $group->name }}" class="w-10 h-10 rounded-2xl object-cover ring-1 ring-white/10 shrink-0">
+            @else
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#5D549C] to-[#7E3A63] flex items-center justify-center text-sm font-black text-white shrink-0 shadow-md">
+                    {{ strtoupper(substr($group->name, 0, 1)) }}
                 </div>
-
-                {{-- Action Buttons --}}
-                <div class="flex flex-wrap items-center gap-2">
-                    <a href="{{ route('groups.treasury.show', $group) }}" class="inline-flex items-center gap-1.5 rounded-xl bg-white/20 px-3.5 py-2 text-xs font-bold text-white backdrop-blur-sm hover:bg-white/30 transition">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>Kas Grup</span>
-                    </a>
-
-                    @if ($can['manage_roles'])
-                        <a href="{{ route('groups.manage', $group) }}" class="inline-flex items-center gap-1.5 rounded-xl bg-white/20 px-3.5 py-2 text-xs font-bold text-white backdrop-blur-sm hover:bg-white/30 transition">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span>Kelola</span>
-                        </a>
-                    @endif
-
-                    @if ($can['create_patungan'])
-                        <a href="{{ route('nongkrong.create', ['group' => $group->id, 'channel' => $activeChannel?->id]) }}" class="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-indigo-700 shadow-md hover:bg-indigo-50 transition">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span>+ Patungan</span>
-                        </a>
-                    @endif
+            @endif
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5">
+                    <h2 class="text-sm font-black text-white truncate leading-tight">{{ $group->name }}</h2>
+                    <i class="ph-fill ph-seal-check text-[#A373D3] text-sm shrink-0" title="Verified Circle"></i>
+                </div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                    <span class="text-[10px] text-[#6F70A2] font-semibold uppercase">{{ $memberCount }} Member</span>
+                    <span class="text-[10px] text-white/20">·</span>
+                    <span class="text-[10px] font-semibold {{ $group->visibility === 'private' ? 'text-amber-400' : 'text-emerald-400' }}">
+                        {{ ucfirst($group->visibility) }}
+                    </span>
                 </div>
             </div>
         </div>
 
-        {{-- Invite Box Quick Bar --}}
-        @if ($can['invite'])
-            @php $invite = $group->activeInvite; @endphp
-            <div class="border-t border-slate-100 bg-slate-50/70 px-6 py-2.5 sm:px-8 text-xs flex flex-wrap items-center justify-between gap-2" x-data="{ copied: false }">
-                <div class="flex items-center gap-2 text-slate-600">
-                    <svg class="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                    </svg>
-                    <span>Undang teman ke grup:</span>
-                    @if ($invite && $invite->usable())
-                        <code class="rounded bg-white px-2 py-0.5 font-mono text-[11px] text-slate-800 border border-slate-200">{{ route('join.show', $invite->token) }}</code>
-                    @else
-                        <span class="text-slate-400 italic">Belum ada link aktif</span>
-                    @endif
-                </div>
+        <!-- Group Quick Actions -->
+        <div class="mt-3 flex items-center gap-2">
+            <a href="{{ route('groups.treasury.show', $group) }}" class="flex-1 text-center py-1.5 px-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-[11px] font-bold border border-white/5 transition flex items-center justify-center gap-1">
+                <i class="ph-bold ph-vault text-xs text-[#EB9998]"></i>
+                <span>Kas Grup</span>
+            </a>
 
-                <div class="flex items-center gap-2">
-                    @if ($invite && $invite->usable())
-                        <button type="button" @click="navigator.clipboard.writeText('{{ route('join.show', $invite->token) }}'); copied = true; setTimeout(() => copied = false, 2000)" class="font-bold text-indigo-600 hover:text-indigo-800">
-                            <span x-text="copied ? '✓ Tersalin!' : 'Salin Link'">Salin Link</span>
-                        </button>
-                    @endif
-                    <form method="POST" action="{{ route('groups.invite.generate', $group) }}">
-                        @csrf
-                        <button class="font-semibold text-slate-500 hover:text-slate-800">Bikin Link Baru</button>
-                    </form>
+            @if ($can['create_patungan'])
+                <a href="{{ route('nongkrong.create', ['group' => $group->id, 'channel' => $activeChannel?->id]) }}" class="flex-1 text-center py-1.5 px-2 rounded-xl bg-gradient-to-r from-[#5D549C] to-[#7E3A63] hover:opacity-90 text-white text-[11px] font-bold shadow-sm transition flex items-center justify-center gap-1">
+                    <i class="ph-bold ph-plus text-xs"></i>
+                    <span>Patungan</span>
+                </a>
+            @endif
+
+            @if ($can['manage_roles'])
+                <a href="{{ route('groups.manage', $group) }}" class="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/5 transition" title="Kelola Grup">
+                    <i class="ph-bold ph-gear text-sm"></i>
+                </a>
+            @endif
+        </div>
+    </div>
+
+    <!-- Channels List (Sub-Grup) Ala Discord -->
+    <div class="pt-2" x-data="{ newChannelOpen: false }">
+        <div class="flex items-center justify-between px-2 pb-2">
+            <span class="text-[11px] font-black uppercase tracking-wider text-[#6F70A2]">
+                Channels / Sub-Grup
+            </span>
+            @if ($can['create_channel'])
+                <button type="button" @click="newChannelOpen = !newChannelOpen" class="w-5 h-5 flex items-center justify-center rounded-lg bg-white/5 text-[#A373D3] hover:bg-white/10 transition" title="Bikin Channel Baru">
+                    <i class="ph-bold ph-plus text-xs"></i>
+                </button>
+            @endif
+        </div>
+
+        <!-- Inline Form Bikin Channel Baru (Dark Theme) -->
+        <div x-show="newChannelOpen" x-cloak class="p-3 mb-2 rounded-2xl bg-[#181224] border border-white/10 space-y-2">
+            <form method="POST" action="{{ route('groups.channels.store', $group) }}" class="space-y-2">
+                @csrf
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-[#6F70A2]" for="channel_name">Nama Channel</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-xs text-gray-500 font-bold">#</span>
+                    <input class="w-full rounded-xl border border-white/10 bg-[#110b17] pl-6 pr-2 py-1.5 text-xs text-white placeholder:text-gray-500 focus:border-[#A373D3] focus:outline-none"
+                        id="channel_name" type="text" name="name" required placeholder="cth: kuliner-bareng" maxlength="80">
                 </div>
+                <input class="w-full rounded-xl border border-white/10 bg-[#110b17] px-2.5 py-1.5 text-xs text-white placeholder:text-gray-500 focus:border-[#A373D3] focus:outline-none"
+                    type="text" name="description" placeholder="Deskripsi singkat (opsional)" maxlength="255">
+                <div class="flex items-center justify-end gap-1.5 pt-1">
+                    <button type="button" @click="newChannelOpen = false" class="rounded-lg px-2 py-1 text-[11px] font-semibold text-gray-400 hover:text-white">Batal</button>
+                    <button type="submit" class="rounded-lg bg-gradient-to-r from-[#5D549C] to-[#7E3A63] px-3 py-1 text-[11px] font-bold text-white hover:opacity-90">Tambah</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Navigation Channels -->
+        <nav class="space-y-1">
+            @foreach ($channels as $ch)
+                @php $isActive = $activeChannel && $activeChannel->id === $ch->id; @endphp
+                <a href="{{ route('groups.show', ['group' => $group, 'channel' => $ch->id]) }}"
+                    class="group flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all {{ $isActive ? 'bg-white/10 border border-[#A373D3]/40 text-white font-bold shadow-sm' : 'text-[#a19db0] hover:bg-white/5 hover:text-white' }}">
+                    <div class="flex items-center gap-2 truncate">
+                        <span class="font-bold text-sm {{ $isActive ? 'text-[#EB9998]' : 'text-gray-500 group-hover:text-gray-300' }}">#</span>
+                        <span class="truncate">{{ $ch->name }}</span>
+                    </div>
+                    <span class="rounded-full px-1.5 py-0.2 text-[10px] font-semibold {{ $isActive ? 'bg-[#5D549C]/40 text-[#A373D3] border border-[#A373D3]/30' : 'bg-white/5 text-[#6F70A2]' }}">
+                        {{ $sessions->where('channel_id', $ch->id)->count() }} bill
+                    </span>
+                </a>
+            @endforeach
+        </nav>
+    </div>
+
+    <!-- Patungan Umum Group (Level Grup tanpa channel) -->
+    <div class="pt-3 border-t border-white/5">
+        <span class="text-[11px] font-black uppercase tracking-wider text-[#6F70A2] block mb-2 px-2">
+            Patungan Umum Group
+        </span>
+        <div class="p-3 rounded-2xl bg-[#181224] border border-white/5 text-xs">
+            <p class="text-[#6F70A2] text-[11px] mb-1.5">Ada {{ $groupLevelSessions->count() }} patungan di luar channel.</p>
+            @if ($groupLevelSessions->isNotEmpty())
+                <div class="space-y-1">
+                    @foreach ($groupLevelSessions->take(3) as $s)
+                        <a href="{{ route('nongkrong.show', $s) }}" class="block truncate rounded-lg bg-black/30 px-2.5 py-1.5 font-medium text-slate-300 hover:text-white hover:bg-white/5 transition">
+                            {{ $s->name }} · <span class="text-[#EB9998]">Rp{{ number_format($s->total_amount, 0, ',', '.') }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    </div>
+@endsection
+
+
+{{-- ========================================================
+     HEADER BAR ATAS CHAT (ALA DISCORD CHANNEL HEADER)
+     ======================================================== --}}
+@section('header-left')
+    <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
+            <span class="text-xl font-bold text-[#EB9998]">#</span>
+            <span class="text-sm sm:text-base font-black text-white tracking-wide">
+                {{ $activeChannel?->name ?? 'general' }}
+            </span>
+        </div>
+        @if ($activeChannel?->description)
+            <span class="hidden md:inline-block text-xs text-[#6F70A2] border-l border-white/10 pl-3 truncate max-w-sm">
+                {{ $activeChannel->description }}
+            </span>
+        @endif
+    </div>
+@endsection
+
+
+{{-- ========================================================
+     KOLOM 3: MAIN CHAT & PATUNGAN STREAM (FULL VIEWPORT)
+     ======================================================== --}}
+@section('content')
+<div class="flex flex-col h-full min-h-0 flex-1 w-full overflow-hidden bg-[#110b17]" x-data="{ activeTab: 'chat' }">
+    
+    <!-- Top Channel Sub-bar (Tab Switcher + Member Toggle) -->
+    <div class="border-b border-white/5 px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 bg-[#181224]/80 backdrop-blur-md shrink-0">
+        <!-- Tabs: Chat vs Patungan -->
+        <div class="flex items-center rounded-xl bg-[#110b17] border border-white/5 p-1 text-xs font-bold">
+            <button type="button" @click="activeTab = 'chat'"
+                :class="activeTab === 'chat' ? 'bg-[#5D549C] text-white shadow-sm' : 'text-[#6F70A2] hover:text-white'"
+                class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition">
+                <i class="ph-bold ph-chat-circle-dots text-sm"></i>
+                <span>Chat</span>
+            </button>
+
+            <button type="button" @click="activeTab = 'patungan'"
+                :class="activeTab === 'patungan' ? 'bg-[#5D549C] text-white shadow-sm' : 'text-[#6F70A2] hover:text-white'"
+                class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition">
+                <i class="ph-bold ph-receipt text-sm"></i>
+                <span>Patungan ({{ $channelSessions->count() }})</span>
+            </button>
+        </div>
+
+        <!-- Tombol Info Channel & Anggota (Toggle Sidebar Kanan) -->
+        <div class="flex items-center gap-2">
+            <button type="button"
+                    @click="rightSidebarOpen = !rightSidebarOpen"
+                    :class="rightSidebarOpen ? 'bg-white/10 text-[#EB9998] border-[#EB9998]/40' : 'bg-white/5 text-[#a19db0] hover:text-white border-white/10'"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition shadow-sm"
+                    title="Buka / Tutup Daftar Anggota & Info">
+                <i class="ph-bold ph-users text-sm"></i>
+                <span>Anggota ({{ $memberCount }})</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- TAB 1: CHAT DISKUSI (ALA DISCORD REAL) -->
+    <div x-show="activeTab === 'chat'" class="flex-1 flex flex-col overflow-hidden relative">
+        
+        <!-- Messages Scrollable Stream -->
+        <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar">
+            @if ($messages->isEmpty())
+                <div class="flex flex-col items-center justify-center h-full text-center p-8 my-auto">
+                    <div class="w-16 h-16 rounded-3xl bg-[#5D549C]/25 border border-[#A373D3]/30 flex items-center justify-center text-[#A373D3] mb-4 shadow-inner">
+                        <i class="ph-fill ph-chats-circle text-3xl"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-white">Selamat datang di #{{ $activeChannel?->name }}!</h3>
+                    <p class="text-xs text-[#a19db0] mt-1 max-w-sm leading-relaxed">
+                        Ini adalah awal dari channel #{{ $activeChannel?->name }}. Sapa teman nongkrong kamu atau mulai obrolan patungan!
+                    </p>
+                </div>
+            @else
+                @foreach ($messages as $msg)
+                    <div class="flex items-start gap-3 group hover:bg-white/5 p-2 rounded-2xl transition">
+                        {{-- Avatar Pengirim --}}
+                        <div class="shrink-0 pt-0.5">
+                            @if ($msg->user->avatar_path)
+                                <img src="{{ asset('storage/' . $msg->user->avatar_path) }}" alt="{{ $msg->user->name }}" class="w-10 h-10 rounded-2xl object-cover ring-1 ring-white/10">
+                            @else
+                                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#5D549C] to-[#7E3A63] flex items-center justify-center text-xs font-black text-white shadow-sm">
+                                    {{ strtoupper(substr($msg->user->name, 0, 1)) }}
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Bubble / Konten Pesan --}}
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-baseline gap-2">
+                                <a href="{{ route('profile.user', $msg->user) }}" class="text-xs font-bold text-white hover:text-[#A373D3] transition">
+                                    {{ $msg->user->name }}
+                                </a>
+                                @if ($msg->user_id === $group->user_id)
+                                    <span class="rounded-md bg-[#EB9998]/20 border border-[#EB9998]/30 px-1.5 py-0.2 text-[9px] font-black text-[#EB9998] uppercase">
+                                        Owner
+                                    </span>
+                                @endif
+                                <span class="text-[10px] text-[#6F70A2]">
+                                    {{ $msg->created_at->format('H:i') }}
+                                </span>
+                            </div>
+                            <div class="mt-1 p-3 rounded-2xl bg-[#181224] border border-white/5 text-xs sm:text-sm text-slate-100 leading-relaxed break-words max-w-2xl">
+                                {{ $msg->body }}
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
+        </div>
+
+        <!-- Sticky Chat Input Bar (Persis Discord Input Box) -->
+        @if ($activeChannel)
+            <div class="border-t border-white/5 p-3 sm:p-4 bg-[#181224] shrink-0">
+                <form method="POST" action="{{ route('groups.channels.messages.store', ['group' => $group, 'channel' => $activeChannel]) }}" class="flex items-center gap-2">
+                    @csrf
+                    <div class="relative flex-1">
+                        <input class="w-full rounded-2xl border border-white/10 bg-[#110b17] pl-4 pr-10 py-3 text-xs sm:text-sm text-white placeholder:text-gray-500 focus:border-[#A373D3] focus:outline-none focus:ring-1 focus:ring-[#A373D3]/30 transition shadow-inner"
+                            type="text" name="body" required placeholder="Kirim pesan ke #{{ $activeChannel->name }}..." maxlength="1000" autocomplete="off">
+                    </div>
+                    <button type="submit" class="h-11 px-5 rounded-2xl bg-gradient-to-r from-[#5D549C] via-[#7E3A63] to-[#EB9998] hover:opacity-95 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 shrink-0" title="Kirim Pesan">
+                        <span>Kirim</span>
+                        <i class="ph-bold ph-paper-plane-right text-sm"></i>
+                    </button>
+                </form>
             </div>
         @endif
     </div>
 
-    {{-- DISCORD-STYLE 3-COLUMN INTERFACE --}}
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {{-- ========================================================
-             KOLOM KIRI: Sub-Grup / Channels Sidebar Ala Discord
-             ======================================================== --}}
-        <div class="lg:col-span-3 space-y-4">
-            <div class="rounded-3xl border border-slate-200/90 bg-white p-4 shadow-sm" x-data="{ newChannelOpen: false }">
-                {{-- Header Channels --}}
-                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <span class="text-xs font-black uppercase tracking-wider text-slate-400">
-                        Channels / Sub-Grup
-                    </span>
-                    @if ($can['create_channel'])
-                        <button type="button" @click="newChannelOpen = !newChannelOpen" class="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition" title="Bikin Sub-Grup / Channel Baru">
-                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-                            </svg>
-                        </button>
-                    @endif
-                </div>
-
-                {{-- Form Bikin Sub-Grup Baru (Discord Style) --}}
-                <div x-show="newChannelOpen" x-cloak class="mt-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                    <form method="POST" action="{{ route('groups.channels.store', $group) }}" class="space-y-2">
-                        @csrf
-                        <label class="block text-[11px] font-bold text-slate-700" for="channel_name">Nama Sub-Grup / Channel</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-xs text-slate-400 font-bold">#</span>
-                            <input class="w-full rounded-xl border border-slate-300 bg-white pl-6 pr-2 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
-                                id="channel_name" type="text" name="name" required placeholder="cth: jalan-jalan" maxlength="80">
-                        </div>
-                        <input class="w-full rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none"
-                            type="text" name="description" placeholder="Deskripsi singkat (opsional)" maxlength="255">
-                        <div class="flex items-center justify-end gap-1.5 pt-1">
-                            <button type="button" @click="newChannelOpen = false" class="rounded-lg px-2.5 py-1 text-[11px] font-semibold text-slate-500 hover:bg-slate-200">Batal</button>
-                            <button type="submit" class="rounded-lg bg-indigo-600 px-3 py-1 text-[11px] font-bold text-white hover:bg-indigo-700 shadow-xs">Tambah</button>
-                        </div>
-                    </form>
-                </div>
-
-                {{-- Channel List --}}
-                <nav class="mt-3 space-y-1">
-                    @foreach ($channels as $ch)
-                        @php $isActive = $activeChannel && $activeChannel->id === $ch->id; @endphp
-                        <a href="{{ route('groups.show', ['group' => $group, 'channel' => $ch->id]) }}"
-                            @class([
-                                'group flex items-center justify-between rounded-2xl px-3 py-2 text-xs font-bold transition-all',
-                                'bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white shadow-md shadow-indigo-200' => $isActive,
-                                'text-slate-600 hover:bg-slate-50 hover:text-slate-900' => !$isActive,
-                            ])>
-                            <div class="flex items-center gap-2 truncate">
-                                <span class="{{ $isActive ? 'text-indigo-200' : 'text-slate-400 group-hover:text-indigo-600' }} font-bold text-sm">#</span>
-                                <span class="truncate">{{ $ch->name }}</span>
-                            </div>
-                            <span @class([
-                                'rounded-full px-1.5 py-0.2 text-[10px] font-semibold',
-                                'bg-white/20 text-white' => $isActive,
-                                'bg-slate-100 text-slate-500' => !$isActive,
-                            ])>
-                                {{ $sessions->where('channel_id', $ch->id)->count() }} bill
-                            </span>
-                        </a>
-                    @endforeach
-                </nav>
+    <!-- TAB 2: PATUNGAN & BILL DI CHANNEL INI -->
+    <div x-show="activeTab === 'patungan'" x-cloak class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar">
+        <div class="flex items-center justify-between pb-3 border-b border-white/5">
+            <div>
+                <h3 class="text-sm font-bold text-white">Daftar Patungan di #{{ $activeChannel?->name }}</h3>
+                <p class="text-xs text-[#6F70A2]">Semua tagihan split bill yang tercatat di sub-channel ini</p>
             </div>
-
-            {{-- Patungan Tanpa Channel (Level Group) --}}
-            <div class="rounded-3xl border border-slate-200/90 bg-white p-4 shadow-sm text-xs">
-                <span class="text-xs font-black uppercase tracking-wider text-slate-400 block mb-2">
-                    Patungan Umum Group
-                </span>
-                <p class="text-slate-500 text-[11px]">Ada {{ $groupLevelSessions->count() }} patungan di luar channel.</p>
-                @if ($groupLevelSessions->isNotEmpty())
-                    <div class="mt-2 space-y-1.5">
-                        @foreach ($groupLevelSessions->take(3) as $s)
-                            <a href="{{ route('nongkrong.show', $s) }}" class="block truncate rounded-xl bg-slate-50 px-2.5 py-1.5 font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
-                                {{ $s->name }} · Rp{{ number_format($s->total_amount, 0, ',', '.') }}
-                            </a>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        {{-- ========================================================
-             KOLOM TENGAH: Chat & Patungan Main Area Ala Discord
-             ======================================================== --}}
-        <div class="lg:col-span-6 space-y-4" x-data="{ activeTab: 'chat' }">
-            <div class="rounded-3xl border border-slate-200/90 bg-white shadow-sm overflow-hidden">
-                {{-- Header Channel Aktif & Tab Switcher --}}
-                <div class="border-b border-slate-100 px-5 py-3.5 flex flex-wrap items-center justify-between gap-3 bg-white">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xl font-black text-indigo-600">#</span>
-                        <div>
-                            <h2 class="text-base font-black text-slate-900 leading-tight">
-                                {{ $activeChannel?->name ?? 'general' }}
-                            </h2>
-                            <p class="text-[11px] text-slate-400 truncate max-w-xs">
-                                {{ $activeChannel?->description ?? 'Channel diskusi & patungan bersama.' }}
-                            </p>
-                        </div>
-                    </div>
-
-                    {{-- Tab Switcher: Chat Diskusi vs Patungan --}}
-                    <div class="flex items-center rounded-xl bg-slate-100 p-1 text-xs font-bold">
-                        <button type="button" @click="activeTab = 'chat'"
-                            :class="activeTab === 'chat' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-500 hover:text-slate-800'"
-                            class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition">
-                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
-                            <span>Chat</span>
-                        </button>
-
-                        <button type="button" @click="activeTab = 'patungan'"
-                            :class="activeTab === 'patungan' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-500 hover:text-slate-800'"
-                            class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition">
-                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>Patungan ({{ $channelSessions->count() }})</span>
-                        </button>
-                    </div>
-                </div>
-
-                {{-- TAB 1: Chat Diskusi (Discord Style) --}}
-                <div x-show="activeTab === 'chat'" class="flex flex-col h-[520px]">
-                    {{-- Messages Scrollable Area --}}
-                    <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-                        @if ($messages->isEmpty())
-                            <div class="flex flex-col items-center justify-center h-full text-center text-slate-400 p-6">
-                                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-500 mb-3">
-                                    <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                    </svg>
-                                </div>
-                                <h3 class="text-sm font-bold text-slate-700">Belum ada obrolan di #{{ $activeChannel?->name }}</h3>
-                                <p class="text-xs text-slate-500 mt-1">Jadilah yang pertama mengirim pesan atau menyapa circle nongkrong kamu!</p>
-                            </div>
-                        @else
-                            @foreach ($messages as $msg)
-                                <div class="flex items-start gap-3 group hover:bg-slate-50/70 p-2 rounded-2xl transition">
-                                    {{-- Avatar --}}
-                                    @if ($msg->user->avatar_path)
-                                        <img src="{{ asset('storage/' . $msg->user->avatar_path) }}" alt="{{ $msg->user->name }}" class="h-9 w-9 rounded-xl object-cover shrink-0 ring-1 ring-slate-200">
-                                    @else
-                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-xs font-bold text-white shadow-xs">
-                                            {{ strtoupper(substr($msg->user->name, 0, 1)) }}
-                                        </div>
-                                    @endif
-
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex items-baseline gap-2">
-                                            <a href="{{ route('profile.user', $msg->user) }}" class="text-xs font-bold text-slate-900 hover:text-indigo-600 hover:underline">
-                                                {{ $msg->user->name }}
-                                            </a>
-                                            @if ($msg->user_id === $group->user_id)
-                                                <span class="rounded bg-indigo-100 px-1 py-0.2 text-[9px] font-black text-indigo-700 uppercase">Owner</span>
-                                            @endif
-                                            <span class="text-[10px] text-slate-400">
-                                                {{ $msg->created_at->format('H:i') }}
-                                            </span>
-                                        </div>
-                                        <p class="mt-1 text-xs text-slate-800 leading-relaxed break-words">
-                                            {{ $msg->body }}
-                                        </p>
-                                    </div>
-                                </div>
-                            @endforeach
-                        @endif
-                    </div>
-
-                    {{-- Form Input Chat (Discord Style) --}}
-                    @if ($activeChannel)
-                        <div class="border-t border-slate-100 p-3 bg-slate-50/50">
-                            <form method="POST" action="{{ route('groups.channels.messages.store', ['group' => $group, 'channel' => $activeChannel]) }}" class="flex items-center gap-2">
-                                @csrf
-                                <input class="flex-1 rounded-2xl border border-slate-300 bg-white px-4 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                                    type="text" name="body" required placeholder="Kirim pesan ke #{{ $activeChannel->name }}..." maxlength="1000" autocomplete="off">
-                                <button type="submit" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white shadow-md hover:from-purple-700 hover:to-blue-700 transition" title="Kirim">
-                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                    </svg>
-                                </button>
-                            </form>
-                        </div>
-                    @endif
-                </div>
-
-                {{-- TAB 2: Patungan & Nongkrong di Channel Ini --}}
-                <div x-show="activeTab === 'patungan'" x-cloak class="p-5 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                            Daftar Bill di #{{ $activeChannel?->name }}
-                        </span>
-                        @if ($can['create_patungan'])
-                            <a href="{{ route('nongkrong.create', ['group' => $group->id, 'channel' => $activeChannel?->id]) }}" class="rounded-xl bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 transition">
-                                + Patungan Baru
-                            </a>
-                        @endif
-                    </div>
-
-                    @if ($channelSessions->isEmpty())
-                        <div class="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-slate-400 text-xs">
-                            Belum ada patungan di channel ini. Tekan tombol "+ Patungan Baru" untuk membuat sesi pertama!
-                        </div>
-                    @else
-                        <div class="space-y-2.5">
-                            @foreach ($channelSessions as $session)
-                                @include('nongkrong._session_row', ['session' => $session])
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        {{-- ========================================================
-             KOLOM KANAN: Member List Ala Discord
-             ======================================================== --}}
-        <div class="lg:col-span-3 space-y-4">
-            <div class="rounded-3xl border border-slate-200/90 bg-white p-4 shadow-sm">
-                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <span class="text-xs font-black uppercase tracking-wider text-slate-400">
-                        Anggota Circle ({{ $memberCount }})
-                    </span>
-                </div>
-
-                <ul class="mt-3 space-y-2.5">
-                    @foreach ($group->members as $member)
-                        <li>
-                            <a href="{{ route('profile.user', $member->user) }}" class="flex items-center gap-2.5 p-1.5 rounded-2xl hover:bg-slate-50 transition group">
-                                <div class="relative shrink-0">
-                                    @if ($member->user->avatar_path)
-                                        <img src="{{ asset('storage/' . $member->user->avatar_path) }}" alt="{{ $member->user->name }}" class="h-8 w-8 rounded-xl object-cover ring-1 ring-slate-200">
-                                    @else
-                                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-600 text-xs font-bold text-white">
-                                            {{ strtoupper(substr($member->user->name, 0, 1)) }}
-                                        </div>
-                                    @endif
-                                    <span class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border border-white bg-emerald-500"></span>
-                                </div>
-
-                                <div class="min-w-0 flex-1">
-                                    <p class="truncate text-xs font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">
-                                        {{ $member->user->name }}
-                                    </p>
-                                    <div class="flex items-center gap-1">
-                                        @if ($member->user_id === $group->user_id)
-                                            <span class="text-[10px] font-extrabold text-indigo-600">Owner</span>
-                                        @elseif ($member->role)
-                                            <span class="text-[10px] text-slate-400">{{ $member->role->name }}</span>
-                                        @else
-                                            <span class="text-[10px] text-slate-400">Member</span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </a>
-
-                            {{-- Tombol Kick Anggota --}}
-                            @if (!empty($can['manage_roles']) && $member->user_id !== $group->user_id)
-                                <div class="px-2 pb-1 flex justify-end">
-                                    <form method="POST" action="{{ route('groups.kick', $group) }}" onsubmit="return confirm('Keluarkan {{ $member->user->name }} dari grup ini?')">
-                                        @csrf
-                                        <input type="hidden" name="user_id" value="{{ $member->user_id }}">
-                                        <button type="submit" class="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-500 hover:text-rose-700 hover:underline transition">
-                                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
-                                            </svg>
-                                            Keluarkan
-                                        </button>
-                                    </form>
-                                </div>
-                            @endif
-                        </li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    {{-- SECTION: DAFTAR ANGGOTA YANG SEDANG HUTANG & JATUH TEMPO --}}
-    <div class="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm">
-        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
-            <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-sm font-black text-slate-900">Status Hutang Anggota Grup</h3>
-                    <p class="text-xs text-slate-500">Daftar anggota yang memiliki tanggungan belum lunas di circle ini</p>
-                </div>
-            </div>
-            @if (isset($groupDebts))
-                <span class="rounded-full bg-rose-50 border border-rose-100 px-3 py-1 text-xs font-bold text-rose-700">
-                    {{ $groupDebts->count() }} Tagihan Aktif
-                </span>
+            @if ($can['create_patungan'])
+                <a href="{{ route('nongkrong.create', ['group' => $group->id, 'channel' => $activeChannel?->id]) }}" class="rounded-xl bg-gradient-to-r from-[#5D549C] to-[#7E3A63] px-3.5 py-2 text-xs font-bold text-white hover:opacity-90 transition shadow-sm">
+                    + Patungan Baru
+                </a>
             @endif
         </div>
 
-        @if (isset($groupDebts) && $groupDebts->isNotEmpty())
-            <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                @foreach ($groupDebts as $debt)
-                    <div class="flex items-center justify-between gap-3 rounded-2xl border border-rose-100 bg-rose-50/30 p-4 transition hover:bg-rose-50/60">
-                        <div class="flex items-center gap-3">
-                            <div class="relative">
-                                @if ($debt->debtor->avatar_path)
-                                    <img src="{{ asset('storage/' . $debt->debtor->avatar_path) }}" alt="{{ $debt->debtor->name }}" class="h-10 w-10 rounded-full object-cover ring-1 ring-rose-200">
-                                @else
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-xs font-bold text-rose-700">
-                                        {{ strtoupper(substr($debt->debtor->name, 0, 1)) }}
-                                    </div>
-                                @endif
-                                <span class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-rose-500 ring-2 ring-white" title="Hutang belum lunas"></span>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-slate-900">{{ $debt->debtor->name }}</p>
-                                <p class="text-[11px] text-slate-500">
-                                    Hutang ke: <span class="font-semibold text-slate-700">{{ $debt->creditor->name }}</span>
-                                </p>
-                                <p class="text-[10px] text-indigo-600 font-medium">
-                                    Sesi: {{ $debt->session->name ?? 'Patungan' }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="text-right">
-                            <span class="text-xs font-black text-rose-600 block">
-                                Rp{{ number_format($debt->amount - ($debt->paid_amount ?? 0), 0, ',', '.') }}
-                            </span>
-                            @if ($debt->due_date)
-                                @php $isPast = $debt->due_date->isPast(); @endphp
-                                <span class="inline-flex items-center gap-0.5 text-[10px] font-semibold {{ $isPast ? 'text-rose-600' : 'text-slate-500' }}">
-                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    {{ $isPast ? 'Jatuh tempo lewat!' : 'Jatuh tempo: ' . $debt->due_date->format('d M Y') }}
-                                </span>
-                            @else
-                                <span class="text-[10px] text-slate-400">Tanpa jatuh tempo</span>
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
+        @if ($channelSessions->isEmpty())
+            <div class="glass-card rounded-2xl border border-dashed border-white/10 p-10 text-center text-[#6F70A2] text-xs">
+                Belum ada patungan di channel ini. Tekan tombol <span class="text-[#EB9998] font-bold">"+ Patungan Baru"</span> untuk membuat sesi pertama!
             </div>
         @else
-            <div class="mt-4 rounded-2xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-500">
-                <svg class="mx-auto h-7 w-7 text-emerald-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Semua anggota bersih! Tidak ada tanggungan hutang yang tertunggak di grup ini.
+            <div class="space-y-2.5">
+                @foreach ($channelSessions as $session)
+                    @include('nongkrong._session_row', ['session' => $session])
+                @endforeach
             </div>
         @endif
     </div>
@@ -481,4 +297,115 @@
         }
     });
 </script>
+@endsection
+
+
+{{-- ========================================================
+     KOLOM 4: RIGHT SIDEBAR (MEMBER LIST & CHANNEL INFO)
+     Hanya muncul saat tombol info/anggota diklik!
+     ======================================================== --}}
+@section('right-sidebar')
+    <!-- Channel Info Card -->
+    <div class="p-4 rounded-2xl bg-[#181224] border border-white/5 mb-5">
+        <div class="flex items-center gap-2 mb-1">
+            <span class="text-lg font-bold text-[#EB9998]">#</span>
+            <h3 class="font-bold text-white text-sm">{{ $activeChannel?->name ?? 'general' }}</h3>
+        </div>
+        <p class="text-xs text-[#a19db0] leading-relaxed">
+            {{ $activeChannel?->description ?? 'Channel obrolan umum & nongkrong circle ini.' }}
+        </p>
+    </div>
+
+    <!-- Quick Invite Box -->
+    @if ($can['invite'])
+        @php $invite = $group->activeInvite; @endphp
+        <div class="p-3.5 rounded-2xl bg-[#181224] border border-white/5 mb-5 text-xs" x-data="{ copied: false }">
+            <span class="text-[10px] uppercase font-bold text-[#6F70A2] tracking-wider block mb-1.5">Link Undangan Circle</span>
+            @if ($invite && $invite->usable())
+                <div class="flex items-center gap-1.5">
+                    <input type="text" readonly value="{{ route('join.show', $invite->token) }}" class="flex-1 bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-[11px] text-gray-300 font-mono">
+                    <button type="button" @click="navigator.clipboard.writeText('{{ route('join.show', $invite->token) }}'); copied = true; setTimeout(() => copied = false, 2000)" class="p-1.5 rounded-lg bg-[#5D549C] text-white hover:opacity-90">
+                        <i :class="copied ? 'ph-bold ph-check text-emerald-400' : 'ph-bold ph-copy'"></i>
+                    </button>
+                </div>
+            @else
+                <form method="POST" action="{{ route('groups.invite.generate', $group) }}">
+                    @csrf
+                    <button class="w-full py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-bold text-[11px]">Bikin Link Baru</button>
+                </form>
+            @endif
+        </div>
+    @endif
+
+    <!-- Anggota Circle List -->
+    <div class="mb-5">
+        <div class="flex items-center justify-between pb-2 mb-3 border-b border-white/5">
+            <span class="text-[11px] font-black uppercase tracking-wider text-[#6F70A2]">
+                Anggota Circle ({{ $memberCount }})
+            </span>
+        </div>
+
+        <ul class="space-y-2">
+            @foreach ($group->members as $member)
+                <li class="p-2 rounded-xl hover:bg-white/5 transition group">
+                    <div class="flex items-center justify-between gap-2">
+                        <a href="{{ route('profile.user', $member->user) }}" class="flex items-center gap-2.5 min-w-0 flex-1">
+                            <div class="relative shrink-0">
+                                @if ($member->user->avatar_path)
+                                    <img src="{{ asset('storage/' . $member->user->avatar_path) }}" alt="{{ $member->user->name }}" class="w-8 h-8 rounded-xl object-cover ring-1 ring-white/10">
+                                @else
+                                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#5D549C] to-[#7E3A63] flex items-center justify-center text-xs font-bold text-white shadow-xs">
+                                        {{ strtoupper(substr($member->user->name, 0, 1)) }}
+                                    </div>
+                                @endif
+                                <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-[#1f1a2b] bg-emerald-500"></span>
+                            </div>
+
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-xs font-bold text-white group-hover:text-[#A373D3] transition">
+                                    {{ $member->user->name }}
+                                </p>
+                                <span class="text-[10px] font-semibold {{ $member->user_id === $group->user_id ? 'text-[#EB9998]' : 'text-[#6F70A2]' }}">
+                                    {{ $member->user_id === $group->user_id ? 'Owner' : ($member->role?->name ?? 'Member') }}
+                                </span>
+                            </div>
+                        </a>
+
+                        {{-- Tombol Kick --}}
+                        @if (!empty($can['manage_roles']) && $member->user_id !== $group->user_id)
+                            <form method="POST" action="{{ route('groups.kick', $group) }}" onsubmit="return confirm('Keluarkan {{ $member->user->name }} dari grup ini?')">
+                                @csrf
+                                <input type="hidden" name="user_id" value="{{ $member->user_id }}">
+                                <button type="submit" class="p-1 rounded-lg hover:bg-rose-500/20 text-[#6F70A2] hover:text-[#EB9998] transition" title="Keluarkan">
+                                    <i class="ph-bold ph-user-minus text-xs"></i>
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+
+    <!-- Status Hutang Anggota Grup (Dark Theme Alert Card) -->
+    @if (isset($groupDebts) && $groupDebts->isNotEmpty())
+        <div class="mt-4 pt-4 border-t border-white/5">
+            <span class="text-[11px] font-black uppercase tracking-wider text-[#EB9998] block mb-2.5">
+                Tagihan Belum Lunas ({{ $groupDebts->count() }})
+            </span>
+            <div class="space-y-2">
+                @foreach ($groupDebts->take(5) as $debt)
+                    <div class="p-3 rounded-xl bg-[#7E3A63]/25 border border-[#EB9998]/30 text-xs">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-white truncate">{{ $debt->debtor->name }}</span>
+                            <span class="font-bold text-[#EB9998]">Rp{{ number_format($debt->amount - ($debt->paid_amount ?? 0), 0, ',', '.') }}</span>
+                        </div>
+                        <p class="text-[10px] text-[#a19db0]">
+                            Ke: {{ $debt->creditor->name }} · {{ $debt->session->name ?? 'Patungan' }}
+                        </p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
 @endsection
