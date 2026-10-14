@@ -161,6 +161,137 @@
 .modal-content { transform: scale(0.95); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .modal-overlay.active .modal-content { transform: scale(1); }
 
+/* ---------------------------------------------------------
+   Pushable 3D Button (User Custom Button)
+   --------------------------------------------------------- */
+.pushable {
+  position: relative;
+  display: inline-block;
+  background: transparent;
+  padding: 0px;
+  border: none;
+  cursor: pointer;
+  outline-offset: 4px;
+  outline-color: deeppink;
+  transition: filter 250ms;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  text-decoration: none;
+  vertical-align: middle;
+}
+
+.shadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+  filter: blur(2px);
+  will-change: transform;
+  transform: translateY(2px);
+  transition: transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+
+.edge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  border-radius: 8px;
+  background: linear-gradient(
+    to right,
+    hsl(248, 39%, 39%) 0%,
+    hsl(248, 39%, 49%) 8%,
+    hsl(248, 39%, 39%) 92%,
+    hsl(248, 39%, 29%) 100%
+  );
+}
+
+.front {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  border-radius: 8px;
+  background: hsl(248, 53%, 58%);
+  padding: 10px 22px;
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-size: 0.8125rem;
+  transform: translateY(-4px);
+  transition: transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+
+.pushable:hover {
+  filter: brightness(110%);
+}
+
+.pushable:hover .front {
+  transform: translateY(-6px);
+  transition: transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+
+.pushable:active .front {
+  transform: translateY(-2px);
+  transition: transform 34ms;
+}
+
+.pushable:hover .shadow {
+  transform: translateY(4px);
+  transition: transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+
+.pushable:active .shadow {
+  transform: translateY(1px);
+  transition: transform 34ms;
+}
+
+.pushable:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Pushable Variants */
+.pushable-danger .edge {
+  background: linear-gradient(
+    to right,
+    hsl(350, 45%, 35%) 0%,
+    hsl(350, 45%, 45%) 8%,
+    hsl(350, 45%, 35%) 92%,
+    hsl(350, 45%, 25%) 100%
+  );
+}
+.pushable-danger .front {
+  background: hsl(350, 60%, 55%);
+}
+
+.pushable-success .edge {
+  background: linear-gradient(
+    to right,
+    hsl(155, 50%, 25%) 0%,
+    hsl(155, 50%, 35%) 8%,
+    hsl(155, 50%, 25%) 92%,
+    hsl(155, 50%, 18%) 100%
+  );
+}
+.pushable-success .front {
+  background: hsl(155, 60%, 40%);
+}
+
+.pushable-sm .front {
+  padding: 6px 14px;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+}
+.pushable-lg .front {
+  padding: 14px 28px;
+  font-size: 0.95rem;
+}
+
 @layer components {
     /* ---------------------------------------------------------
        Tombol
@@ -172,7 +303,7 @@
     }
 
     .btn-primary {
-        @apply bg-gradient-to-r from-[#5D549C] via-[#7E3A63] to-[#A373D3] text-white hover:opacity-95 active:scale-95 shadow-md shadow-[#5D549C]/40;
+        @apply bg-[#5D549C] text-white hover:bg-[#6c62b3] active:scale-95 shadow-md shadow-[#5D549C]/30;
     }
 
     .btn-secondary {
@@ -458,4 +589,22 @@
 
 [x-cloak] {
     display: none !important;
+}
+
+/* ---------------------------------------------------------
+   Marquee Animation (Discord-Style Ticker Tape)
+   --------------------------------------------------------- */
+@keyframes marquee-scroll {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 35s linear infinite;
+}
+
+.animate-marquee:hover {
+    animation-play-state: paused;
 }
