@@ -3,6 +3,7 @@
 @section('title', 'Utang-Piutang '.$session->name)
 
 @section('content')
+<div class="p-4 sm:p-6 max-w-6xl mx-auto w-full space-y-6">
     @php $me = auth()->id(); @endphp
 
     <div class="flex flex-wrap items-start justify-between gap-3">
@@ -103,4 +104,5 @@
             @endif
         </section>
     </div>
+</div>
 @endsection

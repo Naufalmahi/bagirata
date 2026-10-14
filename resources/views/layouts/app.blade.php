@@ -132,7 +132,7 @@
                 <div class="flex-1 overflow-y-auto px-4 space-y-1 custom-scrollbar">
                     <!-- Home / Dashboard -->
                     <a href="{{ $isAuth ? route('dashboard') : url('/') }}"
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors {{ ($activeRoute === 'dashboard' || request()->is('/')) ? 'bg-white/10 text-white border border-[#A373D3]/30 shadow-sm font-semibold' : 'text-[#a19db0] hover:bg-white/5 hover:text-white' }}">
+                       class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors {{ ($activeRoute === 'dashboard' || request()->is('/')) ? 'nav-link-active bg-white/10 text-white border border-[#A373D3]/30 shadow-sm font-semibold' : 'text-[#a19db0] hover:bg-white/5 hover:text-white' }}">
                         <i class="ph-fill ph-compass text-[20px] w-6 text-center text-[#A373D3]"></i>
                         <span class="font-medium text-[14px]">Home</span>
                     </a>
@@ -141,34 +141,34 @@
                     
                     <!-- Groups -->
                     <a href="{{ route('groups.index') }}"
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors {{ str_starts_with($activeRoute, 'groups') ? 'bg-white/10 text-white border border-[#A373D3]/30 font-semibold' : 'text-[#a19db0] hover:bg-white/5 hover:text-white' }}">
+                       class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors {{ str_starts_with($activeRoute, 'groups') ? 'nav-link-active bg-white/10 text-white border border-[#A373D3]/30 font-semibold' : 'text-[#a19db0] hover:bg-white/5 hover:text-white' }}">
                         <i class="ph ph-users-three text-[20px] w-6 text-center text-[#6F70A2]"></i>
                         <span class="font-medium text-[14px]">Groups</span>
                     </a>
                     
                     <!-- Nongkrong -->
                     <a href="{{ route('nongkrong.index') }}"
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors {{ str_starts_with($activeRoute, 'nongkrong') ? 'bg-white/10 text-white border border-[#A373D3]/30 font-semibold' : 'text-[#a19db0] hover:bg-white/5 hover:text-white' }}">
+                       class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors {{ str_starts_with($activeRoute, 'nongkrong') ? 'nav-link-active bg-white/10 text-white border border-[#A373D3]/30 font-semibold' : 'text-[#a19db0] hover:bg-white/5 hover:text-white' }}">
                         <i class="ph ph-coffee text-[20px] w-6 text-center text-[#6F70A2]"></i>
                         <span class="font-medium text-[14px]">Nongkrong</span>
                     </a>
                     
                     <!-- Kalkulator -->
                     <a href="{{ route('calculator.index') }}"
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors {{ str_starts_with($activeRoute, 'calculator') ? 'bg-white/10 text-white border border-[#A373D3]/30 font-semibold' : 'text-[#a19db0] hover:bg-white/5 hover:text-white' }}">
+                       class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors {{ str_starts_with($activeRoute, 'calculator') ? 'nav-link-active bg-white/10 text-white border border-[#A373D3]/30 font-semibold' : 'text-[#a19db0] hover:bg-white/5 hover:text-white' }}">
                         <i class="ph ph-calculator text-[20px] w-6 text-center text-[#6F70A2]"></i>
                         <span class="font-medium text-[14px]">Kalkulator</span>
                     </a>
                     
                     <!-- Budgeting -->
                     <a href="{{ route('budgets.index') }}"
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors {{ str_starts_with($activeRoute, 'budgets') ? 'bg-white/10 text-white border border-[#A373D3]/30 font-semibold' : 'text-[#a19db0] hover:bg-white/5 hover:text-white' }}">
+                       class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors {{ str_starts_with($activeRoute, 'budgets') ? 'nav-link-active bg-white/10 text-white border border-[#A373D3]/30 font-semibold' : 'text-[#a19db0] hover:bg-white/5 hover:text-white' }}">
                         <i class="ph ph-chart-pie-slice text-[20px] w-6 text-center text-[#6F70A2]"></i>
                         <span class="font-medium text-[14px]">Budgeting</span>
                     </a>
 
                     <!-- Utang-Piutang -->
-                    <div class="flex items-center justify-between px-4 py-2.5 rounded-lg cursor-pointer transition-colors {{ str_starts_with($activeRoute, 'debts') ? 'bg-white/10 border border-[#A373D3]/30 text-white' : 'hover:bg-white/5 text-[#a19db0] hover:text-white' }}">
+                    <div class="nav-link flex items-center justify-between px-4 py-2.5 rounded-lg cursor-pointer transition-colors {{ str_starts_with($activeRoute, 'debts') ? 'nav-link-active bg-white/10 border border-[#A373D3]/30 text-white' : 'hover:bg-white/5 text-[#a19db0] hover:text-white' }}">
                         <a href="{{ route('debts.overview') }}" class="flex items-center gap-3 flex-1">
                             <i class="ph-fill ph-hand-coins text-[20px] text-[#EB9998] w-6 text-center"></i>
                             <span class="font-bold text-[14px]">Utang-Piutang</span>
@@ -183,7 +183,7 @@
 
                     <!-- Teman -->
                     <a href="{{ route('friends.index') }}"
-                       class="flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors {{ str_starts_with($activeRoute, 'friends') ? 'bg-white/10 text-white border border-[#A373D3]/30 font-semibold' : 'text-[#a19db0] hover:bg-white/5 hover:text-white' }}">
+                       class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors {{ str_starts_with($activeRoute, 'friends') ? 'nav-link-active bg-white/10 text-white border border-[#A373D3]/30 font-semibold' : 'text-[#a19db0] hover:bg-white/5 hover:text-white' }}">
                         <i class="ph ph-user-list text-[20px] w-6 text-center text-[#6F70A2]"></i>
                         <span class="font-medium text-[14px]">Teman</span>
                     </a>

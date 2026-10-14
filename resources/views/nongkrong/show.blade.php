@@ -3,6 +3,7 @@
 @section('title', $session->name)
 
 @section('content')
+<div class="p-4 sm:p-6 max-w-6xl mx-auto w-full">
     @php $me = auth()->id(); @endphp
 
     {{-- Header --}}
@@ -219,4 +220,5 @@
             @endif
         </aside>
     </div>
+</div>
 @endsection

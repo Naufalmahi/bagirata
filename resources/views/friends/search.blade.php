@@ -3,19 +3,19 @@
 @section('title', 'Cari Teman')
 
 @section('content')
-    <div class="mx-auto max-w-2xl">
+    <div class="p-4 sm:p-6 mx-auto max-w-2xl w-full">
         <div class="mb-6">
-            <a href="{{ route('friends.index') }}" class="back-link inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">
+            <a href="{{ route('friends.index') }}" class="back-link inline-flex items-center gap-1.5 text-xs font-bold text-[#A373D3] hover:text-[#EB9998] transition">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                 Kembali ke Daftar Teman
             </a>
-            <h1 class="page-title mt-2">Cari Teman</h1>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1">Cari teman terdaftar di web BagiRata berdasarkan nama, username, atau email.</p>
+            <h1 class="page-title text-white mt-2">Cari Teman</h1>
+            <p class="text-xs sm:text-sm text-[#a19db0] mt-1">Cari teman terdaftar di web BagiRata berdasarkan nama, username, atau email.</p>
         </div>
 
         <form method="GET" action="{{ route('friends.search') }}" class="flex items-center gap-2 mb-6">
             <div class="relative flex-1">
-                <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input type="text" name="q" value="{{ $q }}" placeholder="Ketik nama, @username, atau email..." class="input pl-10" autofocus>
@@ -30,14 +30,14 @@
             @if ($results->isEmpty())
                 <div class="empty-panel">
                     <div class="flex justify-center mb-3">
-                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#5D549C]/30 text-[#A373D3]">
                             <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
                     </div>
-                    <p class="font-semibold text-ink">Tidak ditemukan pengguna</p>
-                    <p class="mt-1 text-sm text-ink-muted">Tidak ada pengguna yang cocok dengan kata kunci "{{ $q }}".</p>
+                    <p class="font-semibold text-white">Tidak ditemukan pengguna</p>
+                    <p class="mt-1 text-sm text-[#a19db0]">Tidak ada pengguna yang cocok dengan kata kunci "{{ $q }}".</p>
                 </div>
             @else
                 <div class="space-y-3">
@@ -45,15 +45,15 @@
                         <div class="card flex items-center justify-between gap-3 p-4">
                             <a href="{{ route('profile.user', $user) }}" class="flex items-center gap-3 group min-w-0">
                                 @if ($user->avatar_path)
-                                    <img src="{{ asset('storage/' . $user->avatar_path) }}" alt="{{ $user->name }}" class="h-11 w-11 rounded-2xl object-cover ring-1 ring-slate-200">
+                                    <img src="{{ asset('storage/' . $user->avatar_path) }}" alt="{{ $user->name }}" class="h-11 w-11 rounded-2xl object-cover ring-1 ring-white/20">
                                 @else
-                                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-500 to-indigo-600 text-sm font-bold text-white shadow-xs">
+                                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#5D549C] to-[#7E3A63] text-sm font-bold text-white shadow-xs">
                                         {{ strtoupper(substr($user->name, 0, 1)) }}
                                     </div>
                                 @endif
                                 <div class="min-w-0">
-                                    <p class="text-xs font-bold text-slate-800 group-hover:text-indigo-600 transition truncate">{{ $user->name }}</p>
-                                    <p class="text-[11px] text-slate-500 truncate">
+                                    <p class="text-xs font-bold text-white group-hover:text-[#A373D3] transition truncate">{{ $user->name }}</p>
+                                    <p class="text-[11px] text-[#a19db0] truncate">
                                         {{ $user->username ? '@' . $user->username : $user->email }}
                                     </p>
                                 </div>
@@ -85,11 +85,11 @@
                 </div>
             @endif
         @else
-            <div class="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-xs text-slate-400">
-                <svg class="mx-auto h-8 w-8 text-slate-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="empty-panel">
+                <svg class="mx-auto h-8 w-8 text-[#6F70A2] mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                Ketik nama atau username pengguna di kolom pencarian untuk mencari teman.
+                <p class="text-xs text-[#a19db0]">Ketik nama atau username pengguna di kolom pencarian untuk mencari teman.</p>
             </div>
         @endif
     </div>

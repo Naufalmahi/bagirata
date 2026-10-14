@@ -3,7 +3,7 @@
 @section('title', 'Kalkulator Patungan')
 
 @section('content')
-<div class="mx-auto max-w-2xl" x-data="calculator()">
+<div class="p-4 sm:p-6 mx-auto max-w-2xl w-full" x-data="calculator()">
     <h1 class="page-title">Kalkulator Patungan</h1>
     <p class="muted mt-1">Hitung tagihan bersama secara presisi.</p>
 

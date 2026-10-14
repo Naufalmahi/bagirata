@@ -3,7 +3,7 @@
 @section('title', 'Bikin Nongkrong')
 
 @section('content')
-    <div class="mx-auto max-w-xl">
+    <div class="p-4 sm:p-6 mx-auto max-w-xl w-full">
         <a href="{{ $group ? route('groups.show', $group) : route('nongkrong.index') }}" class="back-link">← Balik</a>
         <h1 class="page-title mt-1">Bikin nongkrong / patungan</h1>
         <p class="muted mt-1">

@@ -3,7 +3,7 @@
 @section('title', 'Gabung Group')
 
 @section('content')
-    <div class="mx-auto max-w-md">
+    <div class="p-4 sm:p-6 mx-auto max-w-md w-full">
         @if (!$invite || !$usable)
             <div class="card p-8 text-center">
                 <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">

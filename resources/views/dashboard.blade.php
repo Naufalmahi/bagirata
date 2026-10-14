@@ -10,7 +10,7 @@
 @section('title', 'Explore BagiRata')
 
 @section('content')
-<div class="space-y-8">
+<div class="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8">
     {{-- Header Banner Sambutan (Colors: #5D549C, #7E3A63, #EB9998) --}}
     <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#5D549C] via-[#7E3A63] to-[#EB9998] p-6 sm:p-8 text-white shadow-2xl shadow-[#5D549C]/20 border border-white/10">
         {{-- Background Soft Blobs --}}

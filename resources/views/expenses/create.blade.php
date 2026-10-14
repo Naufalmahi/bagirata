@@ -3,7 +3,7 @@
 @section('title', 'Catat Pengeluaran')
 
 @section('content')
-    <div class="mx-auto max-w-xl">
+    <div class="p-4 sm:p-6 mx-auto max-w-xl w-full">
         <a href="{{ route('nongkrong.show', $session) }}" class="back-link">← Balik ke {{ $session->name }}</a>
         <h1 class="page-title mt-1">Catat pengeluaran</h1>
         <p class="muted mt-1">Utang-piutang bakal langsung diitung ulang otomatis.</p>

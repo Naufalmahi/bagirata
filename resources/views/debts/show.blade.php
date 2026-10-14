@@ -3,6 +3,7 @@
 @section('title', 'Detail Utang')
 
 @section('content')
+<div class="p-4 sm:p-6 max-w-6xl mx-auto w-full space-y-6">
     @php
         $me = auth()->id();
         $canReport = $debt->canDebtorReport(auth()->user());
@@ -167,4 +168,5 @@
             </ul>
         @endif
     </section>
+</div>
 @endsection

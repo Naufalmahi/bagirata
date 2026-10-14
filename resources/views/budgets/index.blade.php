@@ -3,7 +3,7 @@
 @section('title', 'Budgeting')
 
 @section('content')
-<div class="mx-auto max-w-4xl" x-data="{ openModal: false }">
+<div class="p-4 sm:p-6 mx-auto max-w-4xl w-full" x-data="{ openModal: false }">
     <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
             <h1 class="page-title">Budgeting Lu 💸</h1>

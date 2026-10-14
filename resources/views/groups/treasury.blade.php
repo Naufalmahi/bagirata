@@ -3,10 +3,11 @@
 @section('title', 'Kas ' . $group->name)
 
 @section('content')
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+<div class="p-4 sm:p-6 max-w-6xl mx-auto w-full space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
             <a href="{{ route('groups.show', $group) }}" class="back-link">← Group</a>
-            <h1 class="page-title mt-1">Kas Grup: {{ $group->name }}</h1>
+            <h1 class="page-title text-white mt-1">Kas Grup: {{ $group->name }}</h1>
             <p class="muted">Pencatatan saldo finansial bersama</p>
         </div>
     </div>
@@ -185,4 +186,5 @@
             <div class="fixed inset-0 -z-10 bg-ink/40 backdrop-blur-sm"></div>
         </div>
     </div>
+</div>
 @endsection
