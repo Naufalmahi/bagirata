@@ -14,7 +14,7 @@
         @if ($summary['active_count'] > 0)
           Masih ada <strong class="money text-warning-text">Rp{{ number_format($summary['total_owed'] + $summary['total_receivable'], 0, ',', '.') }}</strong> yang belum beres.
         @else
-          Semua aman. Utang sudah rata. 
+          Semua aman. Utang sudah rata.
         @endif
       </p>
     </div>

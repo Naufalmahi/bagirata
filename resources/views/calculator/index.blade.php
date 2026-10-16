@@ -9,42 +9,42 @@
       <i class="ph-bold ph-calculator"></i>
     </div>
     <div>
-      <h1 class="page-title text-xl sm:text-2xl font-black text-white">Kalkulator Split Bill Sat-Set</h1>
-      <p class="muted text-xs sm:text-sm text-[#6F70A2]">Hitung patungan makan & nongki bareng circle lu tanpa pusing kalkulator manual.</p>
+      <h1 class="page-title text-xl sm:text-2xl font-black text-theme-main">Kalkulator Split Bill Sat-Set</h1>
+      <p class="muted text-xs sm:text-sm text-theme-muted">Hitung patungan makan & nongki bareng circle lu tanpa pusing kalkulator manual.</p>
     </div>
   </div>
 
-  <div class="card mt-6 space-y-4 p-6 bg-[#181224] border border-white/5 rounded-3xl shadow-xl">
+  <div class="card mt-6 space-y-4 p-5 sm:p-6 bg-theme-card border border-theme-border rounded-3xl shadow-xl">
     <div>
-      <label class="label text-xs font-bold uppercase tracking-wider text-[#6F70A2] mb-1.5 block" for="calc-subtotal">Total Tagihan / Subtotal (Rp)</label>
-      <input class="input w-full bg-[#110b17] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#A373D3]" id="calc-subtotal" type="number" placeholder="cth: 150000" x-model="subtotal">
+      <label class="label text-xs font-bold uppercase tracking-wider text-theme-muted mb-1.5 block" for="calc-subtotal">Total Tagihan / Subtotal (Rp)</label>
+      <input class="input w-full bg-theme-elevated border border-theme-border rounded-2xl px-4 py-3 text-theme-main placeholder:text-theme-subtle focus:outline-none focus:border-[#A373D3]" id="calc-subtotal" type="number" placeholder="cth: 150000" x-model="subtotal">
     </div>
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <label class="label text-xs font-bold uppercase tracking-wider text-[#6F70A2] mb-1.5 block" for="calc-discount">Potongan / Diskon</label>
-        <input class="input w-full bg-[#110b17] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#A373D3]" id="calc-discount" type="number" placeholder="0" x-model="discount_value">
+        <label class="label text-xs font-bold uppercase tracking-wider text-theme-muted mb-1.5 block" for="calc-discount">Potongan / Diskon</label>
+        <input class="input w-full bg-theme-elevated border border-theme-border rounded-2xl px-4 py-3 text-theme-main placeholder:text-theme-subtle focus:outline-none focus:border-[#A373D3]" id="calc-discount" type="number" placeholder="0" x-model="discount_value">
       </div>
       <div>
-        <label class="label text-xs font-bold uppercase tracking-wider text-[#6F70A2] mb-1.5 block" for="calc-discount-type">Tipe Diskon</label>
-        <select class="select w-full bg-[#110b17] border border-white/10 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-[#A373D3]" id="calc-discount-type" x-model="discount_type">
+        <label class="label text-xs font-bold uppercase tracking-wider text-theme-muted mb-1.5 block" for="calc-discount-type">Tipe Diskon</label>
+        <select class="select w-full bg-theme-elevated border border-theme-border rounded-2xl px-4 py-3 text-theme-main focus:outline-none focus:border-[#A373D3]" id="calc-discount-type" x-model="discount_type">
           <option value="fixed">Nominal (Rp)</option>
           <option value="percent">Persen (%)</option>
         </select>
       </div>
     </div>
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <label class="label text-xs font-bold uppercase tracking-wider text-[#6F70A2] mb-1.5 block" for="calc-service">Biaya Service (%)</label>
-        <input class="input w-full bg-[#110b17] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#A373D3]" id="calc-service" type="number" placeholder="0" x-model="service_rate">
+        <label class="label text-xs font-bold uppercase tracking-wider text-theme-muted mb-1.5 block" for="calc-service">Biaya Service (%)</label>
+        <input class="input w-full bg-theme-elevated border border-theme-border rounded-2xl px-4 py-3 text-theme-main placeholder:text-theme-subtle focus:outline-none focus:border-[#A373D3]" id="calc-service" type="number" placeholder="0" x-model="service_rate">
       </div>
       <div>
-        <label class="label text-xs font-bold uppercase tracking-wider text-[#6F70A2] mb-1.5 block" for="calc-tax">PB1 / Pajak (%)</label>
-        <input class="input w-full bg-[#110b17] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#A373D3]" id="calc-tax" type="number" placeholder="10" x-model="tax_rate">
+        <label class="label text-xs font-bold uppercase tracking-wider text-theme-muted mb-1.5 block" for="calc-tax">PB1 / Pajak (%)</label>
+        <input class="input w-full bg-theme-elevated border border-theme-border rounded-2xl px-4 py-3 text-theme-main placeholder:text-theme-subtle focus:outline-none focus:border-[#A373D3]" id="calc-tax" type="number" placeholder="10" x-model="tax_rate">
       </div>
     </div>
     <div>
-      <label class="label text-xs font-bold uppercase tracking-wider text-[#6F70A2] mb-1.5 block" for="calc-people">Berapa Anak yang Ikut Patungan?</label>
-      <input class="input w-full bg-[#110b17] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#A373D3]" id="calc-people" type="number" x-model="people_count" min="1">
+      <label class="label text-xs font-bold uppercase tracking-wider text-theme-muted mb-1.5 block" for="calc-people">Berapa Anak yang Ikut Patungan?</label>
+      <input class="input w-full bg-theme-elevated border border-theme-border rounded-2xl px-4 py-3 text-theme-main placeholder:text-theme-subtle focus:outline-none focus:border-[#A373D3]" id="calc-people" type="number" x-model="people_count" min="1">
     </div>
 
     <button @click="calculate()" :disabled="loading" class="w-full py-3.5 px-4 rounded-2xl bg-[#5D549C] hover:bg-[#4e4587] text-white font-bold text-sm transition shadow-lg flex items-center justify-center gap-2">
@@ -56,22 +56,22 @@
       </span>
     </button>
 
-    <p x-show="error" x-cloak x-text="error" class="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-medium"></p>
+    <p x-show="error" x-cloak x-text="error" class="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-300 text-xs font-medium"></p>
   </div>
 
-  <div x-show="result && !error" x-cloak class="card mt-6 p-6 bg-gradient-to-br from-[#1c142b] to-[#251a3a] border border-[#A373D3]/30 rounded-3xl shadow-xl">
+  <div x-show="result && !error" x-cloak class="card mt-6 p-5 sm:p-6 bg-theme-elevated border border-[#A373D3]/40 rounded-3xl shadow-xl">
     <div class="flex items-center gap-2 text-[#EB9998] font-bold text-sm">
       <i class="ph-fill ph-check-circle text-lg"></i>
       <span>Beres! Ini Rincian Patungannya</span>
     </div>
     <div class="mt-4 space-y-3 text-sm">
-      <div class="flex justify-between items-center py-2 border-b border-white/5 text-gray-300">
+      <div class="flex justify-between items-center py-2 border-b border-theme-border text-theme-muted">
         <span>Total Tagihan Bersih:</span>
-        <span class="font-black text-white text-base" x-text="'Rp ' + result?.grand_total.toLocaleString('id-ID')"></span>
+        <span class="font-black text-theme-main text-base" x-text="'Rp ' + result?.grand_total.toLocaleString('id-ID')"></span>
       </div>
-      <div class="flex justify-between items-center py-2 text-white">
+      <div class="flex justify-between items-center py-2 text-theme-main">
         <span class="font-bold text-[#A373D3]">Jatah Patungan Tiap Anak:</span>
-        <span class="font-black text-2xl text-[#EB9998]" x-text="'Rp ' + Math.ceil(result?.grand_total / people_count).toLocaleString('id-ID')"></span>
+        <span class="font-black text-xl sm:text-2xl text-[#EB9998]" x-text="'Rp ' + Math.ceil(result?.grand_total / people_count).toLocaleString('id-ID')"></span>
       </div>
     </div>
   </div>

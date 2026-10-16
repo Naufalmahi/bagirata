@@ -4,12 +4,19 @@
 
 @section('content')
 <div class="p-4 sm:p-6 mx-auto max-w-4xl w-full" x-data="{ openModal: false }">
-  <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
     <div>
-      <h1 class="page-title">Budgeting Lu </h1>
-      <p class="muted mt-1">Atur pengeluaran biar nggak rata pas tengah bulan.</p>
+      <h1 class="page-title text-theme-main">Budgeting Circle Lu</h1>
+      <p class="muted mt-1 text-theme-muted">Atur pengeluaran biar nggak rata pas tengah bulan.</p>
     </div>
-    <button @click="openModal = true" class="btn btn-primary">+ Bikin Budget</button>
+    <button @click="openModal = true" class="pushable pushable-sm">
+      <span class="shadow"></span>
+      <span class="edge"></span>
+      <span class="front">
+        <i class="ph-bold ph-plus text-sm"></i>
+        <span>Bikin Budget</span>
+      </span>
+    </button>
   </div>
 
   {{-- Smart Suggestion --}}

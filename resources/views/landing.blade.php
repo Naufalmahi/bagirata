@@ -3,12 +3,12 @@
 @section('title', 'BagiRata · Tempat Nongkrong Santuy, Split Bill Bebas Drama')
 
 @section('content')
-<div class="w-full bg-[#0c0814] text-white selection:bg-[#EB9998]/30 selection:text-white overflow-x-hidden">
+<div class="w-full bg-theme-root text-theme-main selection:bg-[#EB9998]/30 selection:text-white overflow-x-hidden">
 
   {{-- ========================================================
      1. HERO SECTION: Discord 2026 2-Column Hero Aesthetic (Bahasa Gaul)
      ======================================================== --}}
-  <section class="relative overflow-hidden pt-8 pb-16 lg:pt-16 lg:pb-24 border-b border-white/5">
+  <section class="relative overflow-hidden pt-8 pb-16 lg:pt-16 lg:pb-24 border-b border-theme-border">
     {{-- Ambient background glows --}}
     <div class="pointer-events-none absolute -top-32 left-1/4 -z-10 h-[550px] w-[650px] rounded-full bg-[#5D549C]/20 blur-[140px]"></div>
     <div class="pointer-events-none absolute top-1/3 -right-20 -z-10 h-[500px] w-[600px] rounded-full bg-[#7E3A63]/20 blur-[130px]"></div>
@@ -26,7 +26,7 @@
           </div>
 
           {{-- Discord-Style Punchy Headline --}}
-          <h1 class="text-4xl sm:text-6xl xl:text-7xl font-black uppercase tracking-tight text-white leading-[1.05]">
+          <h1 class="text-4xl sm:text-6xl xl:text-7xl font-black uppercase tracking-tight text-theme-main leading-[1.05]">
             GROUP CHAT SERU,<br>
             <span class="text-[#EB9998]">PATUNGAN GAK PAKE DRAMA.</span>
           </h1>

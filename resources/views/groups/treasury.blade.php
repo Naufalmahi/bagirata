@@ -11,7 +11,7 @@
   <div class="flex flex-wrap items-center justify-between gap-3">
     <div>
       <a href="{{ route('groups.show', $group) }}" class="back-link">← Group</a>
-      <h1 class="page-title text-white mt-1">Kas Grup: {{ $group->name }}</h1>
+      <h1 class="page-title text-theme-main mt-1">Kas Grup: {{ $group->name }}</h1>
       <p class="muted">Pencatatan saldo finansial bersama</p>
     </div>
   </div>
